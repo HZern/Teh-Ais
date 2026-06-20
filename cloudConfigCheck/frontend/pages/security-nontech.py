@@ -31,7 +31,9 @@ STATUS_COLORS = {
 API_URL = "http://127.0.0.1:8000/alerts"
 
 
-@st.cache_data(ttl=60)
+# Cache only for 10 seconds, matching the refresh interval.
+# If you want every refresh to call backend directly, remove this decorator.
+@st.cache_data(ttl=10)
 def fetch_security_alerts():
     try:
         response = requests.get(API_URL, timeout=5)
@@ -54,6 +56,7 @@ def fetch_security_alerts():
             "error": str(error),
             "last_updated": datetime.now().strftime("%I:%M:%S %p")
         }
+
 
 # -----------------------------
 # Styling
@@ -141,12 +144,6 @@ st.markdown(
         font-weight: 750;
         border-left: 5px solid #2563eb;
         margin-bottom: 18px;
-    }
-
-    .view-mode-message div,
-    .view-mode-message span,
-    .view-mode-message p {
-        color: #0f172a !important;
     }
 
     .security-card {
@@ -241,12 +238,6 @@ st.markdown(
         border: 1px solid #fde68a;
     }
 
-    .risk-level-low {
-        background: #dcfce7;
-        color: #166534 !important;
-        border: 1px solid #bbf7d0;
-    }
-
     .recommendation-box {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
@@ -309,23 +300,11 @@ st.markdown(
         font-weight: 900;
         line-height: 1.1;
     }
-
-    .sidebar-note {
-        color: #cbd5e1 !important;
-        font-size: 13px;
-        line-height: 1.5;
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.markdown(
-    """
-    <meta http-equiv="refresh" content="160">
-    """,
-    unsafe_allow_html=True
-)
 
 # -----------------------------
 # Helper Functions
@@ -395,7 +374,7 @@ with st.sidebar:
 
 
 # -----------------------------
-# Main Page
+# Main Page Header
 # -----------------------------
 st.markdown(
     """
@@ -419,8 +398,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # -----------------------------
-# Fetch alerts
+# Initial fetch for filter options
 # -----------------------------
 backend_result = fetch_security_alerts()
 alerts = backend_result["alerts"]
@@ -429,15 +409,6 @@ if backend_result["error"]:
     st.error("Backend is not connected. Please start the backend using `python3 security_backend.py`.")
     st.caption(backend_result["error"])
 
-st.markdown(
-    f"""
-    <div class="section-caption">
-        Last updated: <b>{backend_result["last_updated"]}</b> | 
-        Backend message: {backend_result["message"]}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 # -----------------------------
 # Filters
@@ -469,10 +440,10 @@ with filter_col3:
         key="security_sort_filter"
     )
 
+
 # -----------------------------
 # Manager/Technician Toggle
 # -----------------------------
-
 view_col1, view_col2 = st.columns([1, 3])
 
 with view_col1:
@@ -486,80 +457,100 @@ with view_col2:
 
     st.markdown(
         f"""
-<div class="view-mode-message">
-    {view_message}
-</div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-
-
-# -----------------------------
-# Apply Filters
-# -----------------------------
-
-filtered_findings = alerts
-
-if selected_area != "All":
-    filtered_findings = [
-        alert for alert in filtered_findings
-        if alert.get("area") == selected_area
-    ]
-
-if selected_security_risk != "All":
-    filtered_findings = [
-        alert for alert in filtered_findings
-        if alert.get("finding_type") == selected_security_risk
-    ]
-
-filtered_findings = sort_security_findings(filtered_findings, security_sort_option)
-
-# -----------------------------
-# Security Cards
-# -----------------------------
-total_alerts = len(alerts)
-warning_count = len([alert for alert in alerts if alert.get("finding_type") == "Warning"])
-danger_count = len([alert for alert in alerts if alert.get("finding_type") == "Danger"])
-
-summary_col1, summary_col2, summary_col3 = st.columns(3)
-
-with summary_col1:
-    st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-label">Total Alerts</div>
-            <div class="metric-number">{total_alerts}</div>
+        <div class="view-mode-message">
+            {view_message}
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with summary_col2:
+
+# -----------------------------
+# Auto-updating alert section only
+# -----------------------------
+@st.fragment(run_every="10s")
+def render_security_alert_section(
+    selected_area,
+    selected_security_risk,
+    security_sort_option,
+    is_technician_view
+):
+    backend_result = fetch_security_alerts()
+    alerts = backend_result["alerts"]
+
+    if backend_result["error"]:
+        st.error("Backend is not connected. Please start the backend using `python3 security_backend.py`.")
+        st.caption(backend_result["error"])
+
     st.markdown(
         f"""
-        <div class="metric-card">
-            <div class="metric-label">Warnings</div>
-            <div class="metric-number">{warning_count}</div>
+        <div class="section-caption">
+            Last updated: <b>{backend_result["last_updated"]}</b> | 
+            Backend message: {backend_result["message"]}
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with summary_col3:
-    st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-label">Dangers</div>
-            <div class="metric-number">{danger_count}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    filtered_findings = alerts
 
-if not filtered_findings:
-    st.warning("No security alerts match the current filters.")
-else:
+    if selected_area != "All":
+        filtered_findings = [
+            alert for alert in filtered_findings
+            if alert.get("area") == selected_area
+        ]
+
+    if selected_security_risk != "All":
+        filtered_findings = [
+            alert for alert in filtered_findings
+            if alert.get("finding_type") == selected_security_risk
+        ]
+
+    filtered_findings = sort_security_findings(filtered_findings, security_sort_option)
+
+    total_alerts = len(alerts)
+    warning_count = len([alert for alert in alerts if alert.get("finding_type") == "Warning"])
+    danger_count = len([alert for alert in alerts if alert.get("finding_type") == "Danger"])
+
+    summary_col1, summary_col2, summary_col3 = st.columns(3)
+
+    with summary_col1:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">Total Alerts</div>
+                <div class="metric-number">{total_alerts}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with summary_col2:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">Warnings</div>
+                <div class="metric-number">{warning_count}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with summary_col3:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">Dangers</div>
+                <div class="metric-number">{danger_count}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    if not filtered_findings:
+        st.warning("No security alerts match the current filters.")
+        return
+
     for alert in filtered_findings:
         finding_type = alert.get("finding_type", "Warning")
         manager_view = alert.get("manager_view", {})
@@ -579,42 +570,50 @@ else:
             description = manager_view.get("situation", "No situation provided.")
             risk_text = manager_view.get("business_risk", "No business risk provided.")
             recommendation = manager_view.get("recommended_action", "No recommendation provided.")
-            aws_part = alert.get("area", "Unknown AWS area")
+            aws_part = manager_view.get("aws_part_to_fix", alert.get("area", "Unknown AWS area"))
             resource_extra = alert.get("resource_name", "Unknown resource")
             card_icon = "🔐"
             card_label = "Manager View"
 
         card_html = f"""
-<div class="security-card">
-<div class="security-topline">
-<div>
-<div class="security-title">{card_icon} {title}</div>
-<div class="security-situation">{description}</div>
-</div>
-<div class="risk-level-box {risk_level_class(finding_type)}">
-{finding_type}
-<span class="risk-level-label">Risk Level</span>
-</div>
-</div>
-<span class="pill {priority_class(finding_type)}">Finding Type: {finding_type}</span>
-<span class="pill">Severity: {alert.get("severity", "N/A")}</span>
-<span class="pill">AWS Area: {alert.get("area", "N/A")}</span>
-<span class="pill">Resource: {alert.get("resource_name", "N/A")}</span>
-<span class="pill">Status: {alert.get("status", "N/A")}</span>
-<span class="pill">View: {card_label}</span>
-<div class="recommendation-box">
-<div class="recommendation-title">Risk</div>
-<div class="recommendation-text">{risk_text}</div>
-<div class="recommendation-title">AWS Part to Fix</div>
-<div class="recommendation-text">{aws_part}</div>
-<div class="recommendation-title">Resource Details</div>
-<div class="recommendation-text">{resource_extra}</div>
-<div class="recommendation-title">Smart Recommendation</div>
-<div class="smart-recommendation-box">
-<p>{recommendation}</p>
-</div>
-</div>
-</div>
-"""
+            <div class="security-card">
+            <div class="security-topline">
+            <div>
+            <div class="security-title">{card_icon} {title}</div>
+            <div class="security-situation">{description}</div>
+            </div>
+            <div class="risk-level-box {risk_level_class(finding_type)}">
+            {finding_type}
+            <span class="risk-level-label">Risk Level</span>
+            </div>
+            </div>
+            <span class="pill {priority_class(finding_type)}">Finding Type: {finding_type}</span>
+            <span class="pill">Severity: {alert.get("severity", "N/A")}</span>
+            <span class="pill">AWS Area: {alert.get("area", "N/A")}</span>
+            <span class="pill">Resource: {alert.get("resource_name", "N/A")}</span>
+            <span class="pill">Status: {alert.get("status", "N/A")}</span>
+            <span class="pill">View: {card_label}</span>
+            <div class="recommendation-box">
+            <div class="recommendation-title">Risk</div>
+            <div class="recommendation-text">{risk_text}</div>
+            <div class="recommendation-title">AWS Part to Fix</div>
+            <div class="recommendation-text">{aws_part}</div>
+            <div class="recommendation-title">Resource Details</div>
+            <div class="recommendation-text">{resource_extra}</div>
+            <div class="recommendation-title">Smart Recommendation</div>
+            <div class="smart-recommendation-box">
+            <p>{recommendation}</p>
+            </div>
+            </div>
+            </div>
+        """
 
         st.markdown(card_html, unsafe_allow_html=True)
+
+
+render_security_alert_section(
+    selected_area,
+    selected_security_risk,
+    security_sort_option,
+    is_technician_view
+)
