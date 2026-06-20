@@ -1,6 +1,8 @@
 import streamlit as st
+import altair as alt
+import pandas as pd
+import requests
 from datetime import datetime
-from textwrap import dedent
 
 # ==========================================================
 # Hackathon Frontend Prototype
@@ -16,119 +18,10 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Dummy Data
-# Replace this later with API/database/cloud monitoring data
+# Backend Data
 # -----------------------------
-TASKS = [
-    {
-        "id": 1,
-        "title": "Idle cloud servers detected",
-        "risk_score": 96,
-        "category": "Energy Efficiency",
-        "priority": "Danger",
-        "status": "Open",
-        "impact": "High",
-        "cost_saving": "RM 4,200/month",
-        "carbon_saving": "1.8 tCO₂e/month",
-        "summary": "Several compute instances have been running below 5% CPU usage for more than 14 days.",
-        "recommendation": [
-            "Shut down unused instances outside working hours.",
-            "Move low-usage servers to smaller instance types.",
-            "Enable auto-scaling rules based on actual construction workload demand."
-        ],
-        "business_value": "Reduces unnecessary cloud cost and lowers energy consumption without affecting active project work."
-    },
-    {
-        "id": 2,
-        "title": "Public storage bucket contains project files",
-        "risk_score": 94,
-        "category": "Cloud Security",
-        "priority": "Danger",
-        "status": "Open",
-        "impact": "High",
-        "cost_saving": "N/A",
-        "carbon_saving": "N/A",
-        "summary": "A cloud storage bucket containing BIM/project documents is publicly accessible.",
-        "recommendation": [
-            "Disable public access immediately.",
-            "Apply role-based access control for project teams.",
-            "Enable audit logging to track future access changes."
-        ],
-        "business_value": "Reduces the risk of data leakage, project confidentiality breaches, and compliance issues."
-    },
-    {
-        "id": 3,
-        "title": "Database server missing latest security patch",
-        "risk_score": 82,
-        "category": "Cloud Security",
-        "priority": "Warning",
-        "status": "In Progress",
-        "impact": "Medium",
-        "cost_saving": "N/A",
-        "carbon_saving": "N/A",
-        "summary": "A known CVE affects the current database version used for operational data.",
-        "recommendation": [
-            "Schedule patching during low-traffic hours.",
-            "Create a backup before applying the update.",
-            "Re-scan after patching to confirm the vulnerability is resolved."
-        ],
-        "business_value": "Improves cloud security posture while reducing the risk of system compromise."
-    },
-    {
-        "id": 4,
-        "title": "High carbon workload running during peak grid hours",
-        "risk_score": 79,
-        "category": "Sustainability",
-        "priority": "Warning",
-        "status": "Open",
-        "impact": "High",
-        "cost_saving": "RM 1,100/month",
-        "carbon_saving": "0.9 tCO₂e/month",
-        "summary": "Large batch-processing jobs are running during periods with higher estimated grid carbon intensity.",
-        "recommendation": [
-            "Move non-urgent workloads to lower-carbon time windows.",
-            "Prioritize renewable-energy regions where possible.",
-            "Create a carbon-aware scheduling policy."
-        ],
-        "business_value": "Supports ESG reporting and reduces the environmental impact of cloud operations."
-    },
-    {
-        "id": 5,
-        "title": "Over-provisioned Kubernetes cluster",
-        "risk_score": 64,
-        "category": "Energy Efficiency",
-        "priority": "Low",
-        "status": "Open",
-        "impact": "Medium",
-        "cost_saving": "RM 2,000/month",
-        "carbon_saving": "0.7 tCO₂e/month",
-        "summary": "Cluster resource requests are much higher than actual workload usage.",
-        "recommendation": [
-            "Right-size CPU and memory requests.",
-            "Enable cluster autoscaler.",
-            "Review workload limits every week."
-        ],
-        "business_value": "Improves resource efficiency and reduces unnecessary infrastructure spending."
-    },
-    {
-        "id": 6,
-        "title": "No sustainability visibility for project cloud usage",
-        "risk_score": 58,
-        "category": "Sustainability",
-        "priority": "Low",
-        "status": "Open",
-        "impact": "Medium",
-        "cost_saving": "N/A",
-        "carbon_saving": "Reporting improvement",
-        "summary": "Cloud energy and emissions are not clearly mapped to each construction project.",
-        "recommendation": [
-            "Tag cloud resources by project name and department.",
-            "Generate monthly Scope-related cloud emissions summaries.",
-            "Add sustainability KPIs to management reporting."
-        ],
-        "business_value": "Improves ESG visibility and helps managers understand the environmental impact of cloud usage."
-    }
-]
+API_URL = "http://127.0.0.1:8000/workload-tasks"
+CO2_API_URL = "http://127.0.0.1:8000/co2-timeseries"
 
 PRIORITY_ORDER = {
     "Danger": 1,
@@ -149,6 +42,58 @@ CATEGORY_ICONS = {
 }
 
 
+@st.cache_data(ttl=10)
+def fetch_workload_tasks():
+    try:
+        response = requests.get(API_URL, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        return {
+            "tasks": data.get("tasks", []),
+            "count": data.get("count", 0),
+            "message": data.get("message", "Backend returned workload tasks"),
+            "error": None,
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
+
+    except requests.exceptions.RequestException as error:
+        return {
+            "tasks": [],
+            "count": 0,
+            "message": "Failed to connect to backend",
+            "error": str(error),
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
+
+
+@st.cache_data(ttl=10)
+def fetch_co2_timeseries():
+    try:
+        response = requests.get(CO2_API_URL, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        return {
+            "points": data.get("points", []),
+            "message": data.get("message", "Backend returned CO2 trend data"),
+            "method": data.get("method", "Estimated from workload energy data"),
+            "unit": data.get("unit", "kg CO2e"),
+            "error": None,
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
+
+    except requests.exceptions.RequestException as error:
+        return {
+            "points": [],
+            "message": "Failed to connect to backend",
+            "method": "Unavailable",
+            "unit": "kg CO2e",
+            "error": str(error),
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
+
+
 # -----------------------------
 # Styling
 # -----------------------------
@@ -157,6 +102,10 @@ st.markdown(
     <style>
     .main {
         background-color: #f7fafc;
+    }
+
+    [data-testid="stSidebarNav"] {
+        display: none;
     }
 
     .card-control-label {
@@ -251,6 +200,15 @@ st.markdown(
         font-size: 36px;
         font-weight: 900;
         line-height: 1.1;
+    }
+
+    .chart-panel {
+        background: #ffffff;
+        border: 1.5px solid #dbe3ee;
+        border-radius: 18px;
+        padding: 18px 18px 8px 18px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+        margin-bottom: 22px;
     }
 
     .section-heading {
@@ -454,17 +412,30 @@ st.markdown(
 # -----------------------------
 def sort_tasks(tasks, sort_option):
     if sort_option == "Risk: Danger first":
-        return sorted(tasks, key=lambda x: (PRIORITY_ORDER[x["priority"]], -x["risk_score"]))
+        return sorted(tasks, key=lambda x: (PRIORITY_ORDER.get(x["priority"], 99), -x["risk_score"]))
 
     if sort_option == "Risk: Low first":
-        return sorted(tasks, key=lambda x: (PRIORITY_ORDER[x["priority"]], -x["risk_score"]), reverse=True)
+        return sorted(
+            tasks,
+            key=lambda x: (PRIORITY_ORDER.get(x["priority"], 99), -x["risk_score"]),
+            reverse=True
+        )
 
     if sort_option == "Highest cost saving":
         def cost_value(task):
-            value = task["cost_saving"]
+            value = str(task["cost_saving"])
             if value == "N/A":
                 return 0
-            return int(value.replace("RM", "").replace(",", "").replace("/month", "").strip())
+            cleaned_value = (
+                value.replace("RM", "")
+                .replace(",", "")
+                .replace("/month", "")
+                .strip()
+            )
+            try:
+                return int(float(cleaned_value))
+            except ValueError:
+                return 0
 
         return sorted(tasks, key=cost_value, reverse=True)
 
@@ -503,11 +474,24 @@ def get_task_by_id(task_id):
 
 def update_task_risk(task_id, widget_key):
     new_risk = st.session_state[widget_key]
+    st.session_state.risk_overrides[task_id] = new_risk
 
     for task in st.session_state.tasks:
         if task["id"] == task_id:
             task["priority"] = new_risk
             break
+
+
+def apply_risk_overrides(tasks):
+    updated_tasks = []
+
+    for task in tasks:
+        task_copy = task.copy()
+        if task_copy["id"] in st.session_state.risk_overrides:
+            task_copy["priority"] = st.session_state.risk_overrides[task_copy["id"]]
+        updated_tasks.append(task_copy)
+
+    return updated_tasks
 
 
 def go_to_recommendation(task_id):
@@ -529,8 +513,12 @@ if "page" not in st.session_state:
 if "selected_task_id" not in st.session_state:
     st.session_state.selected_task_id = None
 
-if "tasks" not in st.session_state:
-    st.session_state.tasks = TASKS.copy()
+if "risk_overrides" not in st.session_state:
+    st.session_state.risk_overrides = {}
+
+backend_result = fetch_workload_tasks()
+co2_result = fetch_co2_timeseries()
+st.session_state.tasks = apply_risk_overrides(backend_result["tasks"])
 
 
 # -----------------------------
@@ -572,6 +560,20 @@ if st.session_state.page == "dashboard":
         unsafe_allow_html=True
     )
 
+    if backend_result["error"]:
+        st.error("Backend is not connected. Please start the backend using `python3 security_backend.py`.")
+        st.caption(backend_result["error"])
+
+    st.markdown(
+        f"""
+        <div class="section-caption">
+            Last updated: <b>{backend_result["last_updated"]}</b> | 
+            Backend message: {backend_result["message"]}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     tasks = st.session_state.tasks
 
     danger_count = len([t for t in tasks if t["priority"] == "Danger"])
@@ -600,6 +602,68 @@ if st.session_state.page == "dashboard":
             """,
             unsafe_allow_html=True
         )
+
+    st.markdown(
+        """
+        <h2 class="section-heading">CO2 Produced Over Time</h2>
+        <div class="section-caption">
+            Estimated CO2e produced from avoidable workload waste across the cloud environment.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if co2_result["error"]:
+        st.warning("CO2 trend data is unavailable because the backend is not connected.")
+        st.caption(co2_result["error"])
+    elif not co2_result["points"]:
+        st.warning("No CO2 trend data is available.")
+    else:
+        co2_label = f"CO2 produced ({co2_result['unit']})"
+        co2_chart_data = pd.DataFrame(co2_result["points"])
+        co2_chart_data["date"] = pd.to_datetime(co2_chart_data["date"])
+        co2_chart_data = co2_chart_data.rename(columns={"co2_kg": co2_label})
+
+        co2_chart = (
+            alt.Chart(co2_chart_data)
+            .mark_line(color="#0e7490", strokeWidth=3)
+            .encode(
+                x=alt.X(
+                    "date:T",
+                    title=None,
+                    axis=alt.Axis(
+                        labelColor="#475569",
+                        tickColor="#cbd5e1",
+                        domainColor="#cbd5e1",
+                        grid=False,
+                    ),
+                ),
+                y=alt.Y(
+                    f"{co2_label}:Q",
+                    title=co2_label,
+                    axis=alt.Axis(
+                        labelColor="#475569",
+                        titleColor="#334155",
+                        tickColor="#cbd5e1",
+                        domainColor="#cbd5e1",
+                        gridColor="#e2e8f0",
+                    ),
+                    scale=alt.Scale(zero=False),
+                ),
+                tooltip=[
+                    alt.Tooltip("date:T", title="Date", format="%d %b %Y"),
+                    alt.Tooltip(f"{co2_label}:Q", title=co2_label, format=",.2f"),
+                ],
+            )
+            .properties(height=330, background="#ffffff")
+            .configure_view(strokeWidth=0)
+        )
+
+        with st.container(border=True):
+            st.altair_chart(co2_chart, use_container_width=True)
+            st.caption(
+                f"Last updated: {co2_result['last_updated']} | {co2_result['method']}"
+            )
 
     st.markdown(
         """
@@ -656,7 +720,7 @@ if st.session_state.page == "dashboard":
                 with top_left:
                     st.markdown(
                         f"""
-    <div class="task-title">{CATEGORY_ICONS[task["category"]]} {task["title"]}</div>
+    <div class="task-title">{CATEGORY_ICONS.get(task["category"], "☁️")} {task["title"]}</div>
     <div class="task-summary">{task["summary"]}</div>
                         """,
                         unsafe_allow_html=True
@@ -675,7 +739,7 @@ if st.session_state.page == "dashboard":
 
                 badge_html = f"""
                 <span class="pill {priority_class(task["priority"])}">Risk: {task["priority"]}</span>
-                <span class="pill">Status: {STATUS_COLORS[task["status"]]} {task["status"]}</span>
+                <span class="pill">Status: {STATUS_COLORS.get(task["status"], "🔵")} {task["status"]}</span>
                 <span class="pill">Category: {task["category"]}</span>
                 <span class="pill">Impact: {task["impact"]}</span>
                 <span class="pill">Risk Score: {task["risk_score"]}/100</span>
@@ -758,10 +822,10 @@ elif st.session_state.page == "recommendation":
         with left:
             recommendation_html = f"""
         <div class="recommendation-card">
-            <h2>{CATEGORY_ICONS[task["category"]]} {task["title"]}</h2>
+            <h2>{CATEGORY_ICONS.get(task["category"], "☁️")} {task["title"]}</h2>
             <p>{task["summary"]}</p>
             <span class="pill {priority_class(task["priority"])}">Risk: {task["priority"]}</span>
-            <span class="pill">Status: {STATUS_COLORS[task["status"]]} {task["status"]}</span>
+            <span class="pill">Status: {STATUS_COLORS.get(task["status"], "🔵")} {task["status"]}</span>
             <span class="pill">Category: {task["category"]}</span>
             <span class="pill">Impact: {task["impact"]}</span>
             <span class="pill">Risk Score: {task["risk_score"]}/100</span>
@@ -786,6 +850,7 @@ elif st.session_state.page == "recommendation":
                 <p><b>Business value:</b><br>{task["business_value"]}</p>
                 <p><b>Estimated cost saving:</b><br>{task["cost_saving"]}</p>
                 <p><b>Estimated carbon saving:</b><br>{task["carbon_saving"]}</p>
+                <p><b>Backend source:</b><br>{task.get("source", "CloudOps backend")}</p>
                 <p><b>Last updated:</b><br>{datetime.now().strftime("%d %b %Y, %I:%M %p")}</p>
             </div>
         </div>
@@ -802,7 +867,7 @@ elif st.session_state.page == "recommendation":
         next_step_html = """
         <div class="next-step-card">
             <p>
-                For the hackathon prototype, this recommendation can later be generated using rules or AI based on cloud usage metrics, security scan results, cost data, and carbon estimation data.
+                This recommendation is generated from backend cloud configuration scan results and ML sustainability recommendations. Ask the cloud or IT team to review the listed resource and confirm the change window.
             </p>
         </div>
         """
