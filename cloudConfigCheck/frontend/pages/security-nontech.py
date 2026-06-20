@@ -31,7 +31,7 @@ STATUS_COLORS = {
 API_URL = "http://127.0.0.1:8000/alerts"
 
 
-@st.cache_data(ttl=10)
+@st.cache_data(ttl=60)
 def fetch_security_alerts():
     try:
         response = requests.get(API_URL, timeout=5)
@@ -322,7 +322,7 @@ st.markdown(
 
 st.markdown(
     """
-    <meta http-equiv="refresh" content="10">
+    <meta http-equiv="refresh" content="160">
     """,
     unsafe_allow_html=True
 )
