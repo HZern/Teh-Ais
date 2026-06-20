@@ -205,15 +205,14 @@ div[data-baseweb="select"] svg {
     fill: #ffffff !important;
 }
 
-.view-mode-message {
-    background: #dbeafe;
-    color: #0f172a !important;
-    padding: 14px 18px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 750;
-    border-left: 5px solid #2563eb;
-    margin-bottom: 18px;
+div[data-testid="stSegmentedControl"] button {
+    border-radius: 12px !important;
+    font-weight: 750 !important;
+}
+
+div[data-testid="stSegmentedControl"] button[aria-pressed="true"] {
+    background-color: #111827 !important;
+    color: #ffffff !important;
 }
 
 .security-card {
@@ -461,11 +460,11 @@ with st.sidebar:
 
     st.markdown("### Switch View")
 
-    if st.button("⚡ Workload Manager", use_container_width=True):
-        st.switch_page("workload-nontech.py")
+    if st.button("Workload Manager", use_container_width=True):
+        st.switch_page("pages/workload_analytics.py")
 
     if st.button("🔐 Cloud Configuration Check", use_container_width=True):
-        st.switch_page("pages/security-nontech.py")
+        st.switch_page("pages/security_check.py")
 
     st.divider()
 
@@ -544,25 +543,22 @@ with filter_col3:
 # -----------------------------
 # Manager/Technician Toggle
 # -----------------------------
-view_col1, view_col2 = st.columns([1, 3])
-
-with view_col1:
-    is_technician_view = st.toggle("Technician View", value=False)
-
-with view_col2:
-    if is_technician_view:
-        view_message = "Technical view is active. Showing resource IDs, failed rules, and technical fixes."
-    else:
-        view_message = "Manager view is active. Showing business-friendly risks and recommendations."
-
-    st.markdown(
-        f"""
-<div class="view-mode-message">
-{view_message}
-</div>
-        """,
-        unsafe_allow_html=True
+if hasattr(st, "segmented_control"):
+    selected_view = st.segmented_control(
+        "View mode",
+        ["Manager", "Technician"],
+        default="Manager",
+        key="security_view_mode"
     )
+else:
+    selected_view = st.radio(
+        "View mode",
+        ["Manager", "Technician"],
+        horizontal=True,
+        key="security_view_mode"
+    )
+
+is_technician_view = selected_view == "Technician"
 
 
 # -----------------------------

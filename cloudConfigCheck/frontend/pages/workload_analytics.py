@@ -10,7 +10,6 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="CloudOps Manager Dashboard",
-    page_icon="☁️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -44,11 +43,6 @@ STATUS_COLORS = {
     "In Progress": "🟠",
     "Resolved": "🟢"
 }
-
-CATEGORY_ICONS = {
-    "Energy Efficiency": "⚡"
-}
-
 
 @st.cache_data(ttl=10)
 def fetch_workload_tasks():
@@ -92,6 +86,7 @@ st.markdown(
         border: 1px solid #334155 !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
     }
 
     div[data-testid="stButton"] > button:hover {
@@ -103,6 +98,7 @@ st.markdown(
     div[data-testid="stButton"] > button p {
         color: #ffffff !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
     }
     [data-testid="stAppViewContainer"] {
         background-color: #f7fafc !important;
@@ -123,6 +119,7 @@ st.markdown(
 
     [data-testid="stSidebar"] * {
         color: #0f172a !important;
+        font-size: 16px;
     }
 
     div[data-testid="stVerticalBlock"] {
@@ -144,6 +141,7 @@ st.markdown(
     [data-testid="stWidgetLabel"] p {
         color: #0f172a !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
     }
 
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.task-card-marker) {
@@ -171,6 +169,7 @@ st.markdown(
     div[data-baseweb="select"] span {
         color: #ffffff !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
     }
 
     div[data-baseweb="select"] svg {
@@ -186,13 +185,13 @@ st.markdown(
     }
 
     .hero-title {
-        font-size: 34px;
+        font-size: 36px;
         font-weight: 800;
         margin-bottom: 6px;
     }
 
     .hero-subtitle {
-        font-size: 17px;
+        font-size: 18px;
         opacity: 0.92;
     }
 
@@ -208,14 +207,14 @@ st.markdown(
 
     .metric-label {
         color: #334155 !important;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 750;
         margin-bottom: 10px;
     }
 
     .metric-number {
         color: #020617 !important;
-        font-size: 36px;
+        font-size: 38px;
         font-weight: 900;
         line-height: 1.1;
     }
@@ -231,7 +230,7 @@ st.markdown(
 
     .section-heading {
         color: #0f172a !important;
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 850;
         margin-top: 28px;
         margin-bottom: 12px;
@@ -239,7 +238,7 @@ st.markdown(
 
     .section-caption {
         color: #475569 !important;
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 600;
         margin-bottom: 18px;
     }
@@ -261,7 +260,7 @@ st.markdown(
     }
 
     .task-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 750;
         color: #0f172a !important;
         margin-bottom: 6px;
@@ -269,7 +268,7 @@ st.markdown(
 
     .task-summary {
     color: #475569 !important;
-    font-size: 15px;
+    font-size: 16px;
     margin-bottom: 10px;
     line-height: 1.5;
     }
@@ -287,13 +286,13 @@ st.markdown(
         padding: 12px 14px;
         border-radius: 14px;
         font-weight: 850;
-        font-size: 16px;
+        font-size: 18px;
         margin: 6px 8px 6px 8px;
     }
 
     .priority-level-label {
         display: block;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 650;
         margin-top: 3px;
     }
@@ -324,12 +323,12 @@ st.markdown(
         background: #0f172a;
         color: white !important;
         font-weight: 800;
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .priority-score-label {
         display: block;
-        font-size: 11px;
+        font-size: 12px;
         color: #cbd5e1 !important;
         font-weight: 600;
         margin-top: 2px;
@@ -341,7 +340,7 @@ st.markdown(
         border-radius: 999px;
         background: #e0f2fe;
         color: #075985;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 650;
         margin-right: 6px;
         margin-bottom: 6px;
@@ -378,13 +377,13 @@ st.markdown(
     }
 
     .recommendation-card p {
-        font-size: 15px;
+        font-size: 16px;
         line-height: 1.5;
     }
 
     .manager-summary-text {
         color: #334155 !important;
-        font-size: 15px;
+        font-size: 16px;
         line-height: 1.6;
     }
 
@@ -396,6 +395,7 @@ st.markdown(
         border-left: 5px solid #22c55e;
         margin-bottom: 12px;
         font-weight: 650;
+        font-size: 16px;
     }
 
     .action-card-first {
@@ -421,7 +421,7 @@ st.markdown(
 
     .small-muted {
         color: #64748b;
-        font-size: 14px;
+        font-size: 15px;
     }
     </style>
     """,
@@ -525,18 +525,18 @@ st.session_state.tasks = backend_result["tasks"]
 # Sidebar
 # -----------------------------
 with st.sidebar:
-    st.title("☁️ CloudOps")
+    st.title("CloudOps")
     st.caption("Manager View")
 
     st.divider()
 
     st.markdown("### Switch View")
 
-    if st.button("⚡ Workload Manager", use_container_width=True):
-        st.switch_page("workload-nontech.py")
+    if st.button("Workload Manager", use_container_width=True):
+        st.switch_page("pages/workload_analytics.py")
 
     if st.button("🔐 Cloud Configuration Check", use_container_width=True):
-        st.switch_page("pages/security-nontech.py")
+        st.switch_page("pages/security_check.py")
 
     st.divider()
 
@@ -551,7 +551,7 @@ if st.session_state.page == "dashboard":
     st.markdown(
         """
         <div class="hero-card">
-            <div class="hero-title">Good afternoon, Project Manager 👋</div>
+            <div class="hero-title">Good afternoon, Project Manager</div>
             <div class="hero-subtitle">
                 Here is today’s overview of energy efficiency issues across your construction technology environment.
             </div>
@@ -650,7 +650,7 @@ if st.session_state.page == "dashboard":
                 with top_left:
                     st.markdown(
                         f"""
-    <div class="task-title">{CATEGORY_ICONS.get(task["category"], "☁️")} {task["title"]}</div>
+    <div class="task-title">{task["title"]}</div>
     <div class="task-summary">{task["summary"]}</div>
                         """,
                         unsafe_allow_html=True
@@ -718,7 +718,7 @@ elif st.session_state.page == "recommendation":
         with left:
             recommendation_html = f"""
         <div class="recommendation-card">
-            <h2>{CATEGORY_ICONS.get(task["category"], "☁️")} {task["title"]}</h2>
+            <h2>{task["title"]}</h2>
             <p>{task["summary"]}</p>
             <span class="pill {priority_class(task["priority"])}">Priority: {priority_label(task["priority"])}</span>
             <span class="pill">Status: {STATUS_COLORS.get(task["status"], "🔵")} {task["status"]}</span>

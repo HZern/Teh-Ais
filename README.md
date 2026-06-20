@@ -31,13 +31,13 @@ You can test it by opening the alerts endpoint in a browser.
 
 From the project root:
 
-cd frontend
-python3 -m streamlit run workload-nontech.py
+cd cloudConfigCheck/frontend
+python3 -m streamlit run pages/workload_analytics.py
 
 Or, to open the security page directly:
 
-cd frontend
-python3 -m streamlit run pages/security-nontech.py
+cd cloudConfigCheck/frontend
+python3 -m streamlit run pages/security_check.py
 
 Streamlit will open the dashboard in your browser, usually at:
 
