@@ -1,0 +1,47 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Manufacturing user follows least privilege and has recently used access keys.",
+    "resource_id": "arn:aws:iam::123456789012:user/hilti-manufacturing-operator-safe",
+    "resource_name": "hilti-manufacturing-operator-safe",
+    "resource_type": "AWS::IAM::User",
+    "team": "Manufacturing",
+    "business_context": "Used by a manufacturing operator to access approved production reports.",
+    "is_admin_user": false,
+    "attached_policies": [
+      "AmazonS3ReadOnlyAccess"
+    ],
+    "access_key_age_days": 25,
+    "access_key_last_used_days_ago": 5
+  },
+  {
+    "case_type": "warning",
+    "description": "Manufacturing IAM user does not have admin access, but the access key is old and should be rotated.",
+    "resource_id": "arn:aws:iam::123456789012:user/hilti-manufacturing-reporting-warning",
+    "resource_name": "hilti-manufacturing-reporting-warning",
+    "resource_type": "AWS::IAM::User",
+    "team": "Manufacturing",
+    "business_context": "Used by reporting scripts to access manufacturing quality reports.",
+    "is_admin_user": false,
+    "attached_policies": [
+      "AmazonS3ReadOnlyAccess"
+    ],
+    "access_key_age_days": 120,
+    "access_key_last_used_days_ago": 10
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous IAM misconfiguration. A non-admin manufacturing user has AdministratorAccess and an old access key.",
+    "resource_id": "arn:aws:iam::123456789012:user/hilti-manufacturing-temp-user-danger",
+    "resource_name": "hilti-manufacturing-temp-user-danger",
+    "resource_type": "AWS::IAM::User",
+    "team": "Manufacturing",
+    "business_context": "Temporary manufacturing support user that should not have full administrator permissions.",
+    "is_admin_user": false,
+    "attached_policies": [
+      "AdministratorAccess"
+    ],
+    "access_key_age_days": 160,
+    "access_key_last_used_days_ago": 95
+  }
+]

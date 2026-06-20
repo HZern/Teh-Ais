@@ -1,0 +1,38 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Correctly configured manufacturing database. The database is private, encrypted, and backups are enabled.",
+    "resource_id": "arn:aws:rds:eu-west-1:123456789012:db:hilti-manufacturing-production-db-safe",
+    "resource_name": "hilti-manufacturing-production-db-safe",
+    "resource_type": "AWS::RDS::DBInstance",
+    "team": "Manufacturing",
+    "business_context": "Stores manufacturing production records, process logs, and operational database information.",
+    "publicly_accessible": false,
+    "encryption_enabled": true,
+    "backup_enabled": true
+  },
+  {
+    "case_type": "warning",
+    "description": "Manufacturing database is private, but encryption is disabled. It is not publicly reachable, but does not fully meet the professional security baseline.",
+    "resource_id": "arn:aws:rds:eu-west-1:123456789012:db:hilti-manufacturing-quality-db-warning",
+    "resource_name": "hilti-manufacturing-quality-db-warning",
+    "resource_type": "AWS::RDS::DBInstance",
+    "team": "Manufacturing",
+    "business_context": "Stores quality inspection results, defect records, and production audit data.",
+    "publicly_accessible": false,
+    "encryption_enabled": false,
+    "backup_enabled": true
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous RDS misconfiguration. The manufacturing database is publicly accessible from the internet.",
+    "resource_id": "arn:aws:rds:eu-west-1:123456789012:db:hilti-manufacturing-operations-db-danger",
+    "resource_name": "hilti-manufacturing-operations-db-danger",
+    "resource_type": "AWS::RDS::DBInstance",
+    "team": "Manufacturing",
+    "business_context": "Stores operational manufacturing data, machine records, and internal production database information.",
+    "publicly_accessible": true,
+    "encryption_enabled": false,
+    "backup_enabled": false
+  }
+]

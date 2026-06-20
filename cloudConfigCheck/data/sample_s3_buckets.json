@@ -1,0 +1,41 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Correctly configured manufacturing S3 bucket. The bucket is private and encrypted.",
+    "resource_id": "arn:aws:s3:::hilti-manufacturing-production-documents-safe",
+    "resource_name": "hilti-manufacturing-production-documents-safe",
+    "resource_type": "AWS::S3::Bucket",
+    "team": "Manufacturing",
+    "business_context": "Stores manufacturing production documents, equipment manuals, and internal process files.",
+    "public_access_blocked": true,
+    "bucket_policy_public": false,
+    "acl_public": false,
+    "encryption_enabled": true
+  },
+  {
+    "case_type": "warning",
+    "description": "Manufacturing S3 bucket is private, but encryption is disabled. It is not publicly exposed, but it does not fully meet the professional security baseline.",
+    "resource_id": "arn:aws:s3:::hilti-manufacturing-quality-reports-warning",
+    "resource_name": "hilti-manufacturing-quality-reports-warning",
+    "resource_type": "AWS::S3::Bucket",
+    "team": "Manufacturing",
+    "business_context": "Stores quality inspection reports, production issue logs, and factory audit documents.",
+    "public_access_blocked": true,
+    "bucket_policy_public": false,
+    "acl_public": false,
+    "encryption_enabled": false
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous manufacturing S3 misconfiguration. The bucket is publicly accessible and encryption is disabled.",
+    "resource_id": "arn:aws:s3:::hilti-manufacturing-machine-data-danger",
+    "resource_name": "hilti-manufacturing-machine-data-danger",
+    "resource_type": "AWS::S3::Bucket",
+    "team": "Manufacturing",
+    "business_context": "Stores machine output files, production data exports, and manufacturing process records.",
+    "public_access_blocked": false,
+    "bucket_policy_public": true,
+    "acl_public": true,
+    "encryption_enabled": false
+  }
+]

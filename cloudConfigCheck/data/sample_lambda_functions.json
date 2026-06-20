@@ -1,0 +1,50 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Correctly configured Lambda function. The function role only has the permissions required for its task.",
+    "resource_id": "arn:aws:lambda:eu-west-1:123456789012:function:hilti-manufacturing-report-processor-safe",
+    "resource_name": "hilti-manufacturing-report-processor-safe",
+    "resource_type": "AWS::Lambda::Function",
+    "team": "Manufacturing",
+    "business_context": "Processes manufacturing quality report files uploaded to an approved S3 bucket.",
+    "function_role": "hilti-manufacturing-report-processor-role-safe",
+    "attached_policies": [
+      "AWSLambdaBasicExecutionRole",
+      "CustomS3ReadOnlyManufacturingReports"
+    ],
+    "has_admin_access": false,
+    "has_wildcard_permissions": false
+  },
+  {
+    "case_type": "warning",
+    "description": "Lambda function role has broader permissions than needed. It does not have full administrator access, but it should be reviewed.",
+    "resource_id": "arn:aws:lambda:eu-west-1:123456789012:function:hilti-manufacturing-data-sync-warning",
+    "resource_name": "hilti-manufacturing-data-sync-warning",
+    "resource_type": "AWS::Lambda::Function",
+    "team": "Manufacturing",
+    "business_context": "Synchronises manufacturing data between internal systems and cloud storage.",
+    "function_role": "hilti-manufacturing-data-sync-role-warning",
+    "attached_policies": [
+      "AWSLambdaBasicExecutionRole",
+      "AmazonS3FullAccess"
+    ],
+    "has_admin_access": false,
+    "has_wildcard_permissions": true
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous Lambda misconfiguration. A small serverless function has administrator-level permissions.",
+    "resource_id": "arn:aws:lambda:eu-west-1:123456789012:function:hilti-manufacturing-temp-automation-danger",
+    "resource_name": "hilti-manufacturing-temp-automation-danger",
+    "resource_type": "AWS::Lambda::Function",
+    "team": "Manufacturing",
+    "business_context": "Temporary automation function used for manufacturing support tasks.",
+    "function_role": "hilti-manufacturing-temp-automation-role-danger",
+    "attached_policies": [
+      "AWSLambdaBasicExecutionRole",
+      "AdministratorAccess"
+    ],
+    "has_admin_access": true,
+    "has_wildcard_permissions": true
+  }
+]
