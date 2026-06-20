@@ -1,0 +1,80 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Correctly configured security group. SSH is not open, and only HTTPS is allowed for application access.",
+    "resource_id": "arn:aws:ec2:eu-west-1:123456789012:security-group/sg-0safe123456789abc",
+    "resource_name": "hilti-manufacturing-app-server-sg-safe",
+    "resource_type": "AWS::EC2::SecurityGroup",
+    "team": "Manufacturing",
+    "business_context": "Controls network access to the manufacturing application server.",
+    "attached_to": {
+      "resource_id": "arn:aws:ec2:eu-west-1:123456789012:instance/i-0safe123456789abc",
+      "resource_name": "hilti-manufacturing-app-server-safe",
+      "resource_type": "AWS::EC2::Instance"
+    },
+    "inbound_rules": [
+      {
+        "protocol": "tcp",
+        "port": 443,
+        "source": "0.0.0.0/0",
+        "description": "HTTPS access for manufacturing application traffic"
+      }
+    ]
+  },
+  {
+    "case_type": "warning",
+    "description": "SSH is enabled but restricted to a specific company VPN IP. This is not publicly exposed, but admin access should still be reviewed.",
+    "resource_id": "arn:aws:ec2:eu-west-1:123456789012:security-group/sg-0warning123456abc",
+    "resource_name": "hilti-manufacturing-maintenance-sg-warning",
+    "resource_type": "AWS::EC2::SecurityGroup",
+    "team": "Manufacturing",
+    "business_context": "Controls maintenance access to a manufacturing support server.",
+    "attached_to": {
+      "resource_id": "arn:aws:ec2:eu-west-1:123456789012:instance/i-0warning123456abc",
+      "resource_name": "hilti-manufacturing-maintenance-server-warning",
+      "resource_type": "AWS::EC2::Instance"
+    },
+    "inbound_rules": [
+      {
+        "protocol": "tcp",
+        "port": 22,
+        "source": "203.0.113.10/32",
+        "description": "SSH access restricted to approved company VPN IP"
+      },
+      {
+        "protocol": "tcp",
+        "port": 443,
+        "source": "0.0.0.0/0",
+        "description": "HTTPS access for manufacturing application traffic"
+      }
+    ]
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous security group misconfiguration. SSH is open to the entire internet.",
+    "resource_id": "arn:aws:ec2:eu-west-1:123456789012:security-group/sg-0danger1234567abc",
+    "resource_name": "hilti-manufacturing-admin-sg-danger",
+    "resource_type": "AWS::EC2::SecurityGroup",
+    "team": "Manufacturing",
+    "business_context": "Controls admin access to a manufacturing server.",
+    "attached_to": {
+      "resource_id": "arn:aws:ec2:eu-west-1:123456789012:instance/i-0danger1234567abc",
+      "resource_name": "hilti-manufacturing-admin-server-danger",
+      "resource_type": "AWS::EC2::Instance"
+    },
+    "inbound_rules": [
+      {
+        "protocol": "tcp",
+        "port": 22,
+        "source": "0.0.0.0/0",
+        "description": "SSH access open to the internet"
+      },
+      {
+        "protocol": "tcp",
+        "port": 443,
+        "source": "0.0.0.0/0",
+        "description": "HTTPS access for manufacturing application traffic"
+      }
+    ]
+  }
+]
