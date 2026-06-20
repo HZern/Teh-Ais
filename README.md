@@ -111,16 +111,6 @@ ai/sustainability_calculator.py
 ai/generate_dashboard_output.py
 ```
 
-## 3. Optional: Run The ML Pipeline
-
-Run these from the repo root if you need to regenerate `ml-pipeline/resource_recommendations.json`:
-
-```bash
-python3 ml-pipeline/01_load_and_join.py
-python3 ml-pipeline/02_features_and_labels.py
-python3 ml-pipeline/03_train_models.py
-python3 ml-pipeline/04_generate_output.py
-```
 
 The backend reads:
 
@@ -138,55 +128,6 @@ python3 ai/generate_dashboard_output.py \
   --output person5_dashboard_output.json
 ```
 
-## 5. Run The Backend
-
-Open Terminal 1 from the repo root:
-
-```bash
-source .venv/bin/activate
-cd cloudConfigCheck
-python3 security_backend.py
-```
-
-The backend runs at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Useful endpoints:
-
-```text
-http://127.0.0.1:8000/alerts
-http://127.0.0.1:8000/workload-tasks
-http://127.0.0.1:8000/co2-timeseries
-```
-
-Keep this terminal running.
-
-## 6. Run The Streamlit Frontend
-
-Open Terminal 2 from the repo root:
-
-```bash
-source .venv/bin/activate
-cd cloudConfigCheck/frontend
-python3 -m streamlit run pages/workload_analytics.py
-```
-
-To open the cloud configuration check page directly instead:
-
-```bash
-source .venv/bin/activate
-cd cloudConfigCheck/frontend
-python3 -m streamlit run pages/security_check.py
-```
-
-Streamlit usually opens at:
-
-```text
-http://localhost:8501
-```
 
 ## Recommended Run Order
 
@@ -200,12 +141,6 @@ source .venv/bin/activate
 pip install -r ml-pipeline/requirements.txt
 pip install -r cloudConfigCheck/frontend/requirements.txt
 
-# 3. Optional: regenerate ML recommendation data
-python3 ml-pipeline/01_load_and_join.py
-python3 ml-pipeline/02_features_and_labels.py
-python3 ml-pipeline/03_train_models.py
-python3 ml-pipeline/04_generate_output.py
-```
 
 Then run the backend in Terminal 1:
 
