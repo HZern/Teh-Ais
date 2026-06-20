@@ -17,7 +17,7 @@ AI_DIR = PROJECT_DIR / "ai"
 if str(AI_DIR) not in sys.path:
     sys.path.append(str(AI_DIR))
 
-from sustainability_calculator import SustainabilityCalculator
+from ai.sustainability_calculator import SustainabilityCalculator
 
 
 def load_ml_recommendations():
