@@ -7,7 +7,7 @@ from rules.iam_rules import check_iam_user_baseline
 from rules.rds_rules import check_rds_database_baseline
 from rules.cloudtrail_rules import check_cloudtrail_baseline
 from rules.public_endpoint_rules import check_public_endpoint_baseline
-
+from rules.lambda_rules import check_lambda_role_baseline
 
 ## Directories
 BASE_DIR = Path(__file__).resolve().parent
@@ -17,7 +17,7 @@ IAM_DATA_FILE = BASE_DIR / "data" / "sample_iam_users.json"
 RDS_DATA_FILE = BASE_DIR / "data" / "sample_rds_databases.json"
 CLOUDTRAIL_DATA_FILE = BASE_DIR / "data" / "sample_cloudtrail.json"
 PUBLIC_ENDPOINT_DATA_FILE = BASE_DIR / "data" / "sample_public_endpoints.json"
-
+LAMBDA_DATA_FILE = BASE_DIR / "data" / "sample_lambda_functions.json"
 
 # Load s3 buckets
 def load_s3_buckets():
@@ -66,7 +66,16 @@ def load_public_endpoints():
     """
     with open(PUBLIC_ENDPOINT_DATA_FILE, "r") as file:
         return json.load(file)
+
+# Load lambda functions
+def load_lambda_functions():
+    """
+    Loads sample AWS-style Lambda function configuration data.
+    """
+    with open(LAMBDA_DATA_FILE, "r") as file:
+        return json.load(file)
     
+
 def run_checks():
     """
     Runs all cloud security baseline checks.
@@ -96,6 +105,10 @@ def run_checks():
     public_endpoints = load_public_endpoints()
     for endpoint in public_endpoints:
         findings.append(check_public_endpoint_baseline(endpoint))
+    
+    lambda_functions = load_lambda_functions()
+    for function in lambda_functions:
+        findings.append(check_lambda_role_baseline(function))
 
     return findings
 
