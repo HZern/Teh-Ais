@@ -5,6 +5,9 @@ from rules.s3_rules import check_s3_security_baseline
 from rules.security_group_rules import check_security_group_ssh_baseline 
 from rules.iam_rules import check_iam_user_baseline
 from rules.rds_rules import check_rds_database_baseline
+from rules.cloudtrail_rules import check_cloudtrail_baseline
+from rules.public_endpoint_rules import check_public_endpoint_baseline
+
 
 ## Directories
 BASE_DIR = Path(__file__).resolve().parent
@@ -12,6 +15,9 @@ DATA_FILE = BASE_DIR / "data" / "sample_s3_buckets.json"
 SECURITY_GROUP_DATA_FILE = BASE_DIR / "data" / "sample_security_groups.json"
 IAM_DATA_FILE = BASE_DIR / "data" / "sample_iam_users.json"
 RDS_DATA_FILE = BASE_DIR / "data" / "sample_rds_databases.json"
+CLOUDTRAIL_DATA_FILE = BASE_DIR / "data" / "sample_cloudtrail.json"
+PUBLIC_ENDPOINT_DATA_FILE = BASE_DIR / "data" / "sample_public_endpoints.json"
+
 
 # Load s3 buckets
 def load_s3_buckets():
@@ -45,6 +51,22 @@ def load_rds_databases():
     with open(RDS_DATA_FILE, "r") as file:
         return json.load(file)
 
+# Load cloudtrail
+def load_cloudtrail_trails():
+    """
+    Loads sample AWS-style CloudTrail configuration data.
+    """
+    with open(CLOUDTRAIL_DATA_FILE, "r") as file:
+        return json.load(file)
+    
+# Load public endpoints
+def load_public_endpoints():
+    """
+    Loads sample AWS-style API Gateway / CloudFront public endpoint configuration data.
+    """
+    with open(PUBLIC_ENDPOINT_DATA_FILE, "r") as file:
+        return json.load(file)
+    
 def run_checks():
     """
     Runs all cloud security baseline checks.
@@ -66,6 +88,14 @@ def run_checks():
     rds_databases = load_rds_databases()
     for database in rds_databases:
         findings.append(check_rds_database_baseline(database))
+
+    cloudtrail_trails = load_cloudtrail_trails()
+    for trail in cloudtrail_trails:
+        findings.append(check_cloudtrail_baseline(trail))
+
+    public_endpoints = load_public_endpoints()
+    for endpoint in public_endpoints:
+        findings.append(check_public_endpoint_baseline(endpoint))
 
     return findings
 
