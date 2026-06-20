@@ -65,12 +65,15 @@ def check_security_group_ssh_baseline(security_group):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": "SSH access is restricted to a specific IP range, but still needs review.",
-            "risk": "The server is not open to everyone, but admin access should be checked to confirm it is approved and still required.",
+            "manager_title": "Server access needs review",
+            "manager_aws_part": "Server firewall access settings",
+
+            "reason": "Server administration access is allowed only from a restricted network, but it should still be reviewed.",
+            "risk": "The server is not open to everyone, but admin access should be checked to confirm it is approved, still needed, and limited to trusted networks.",
 
             "manager_recommendation": (
-                "This server is not open to the whole internet, but SSH admin access is still enabled. "
-                "The manager should confirm with the cloud or IT team that this access is approved and necessary."
+                "Ask the IT or cloud team to confirm whether this server admin access is still required. "
+                "If it is not needed, remove it. If it is needed, ensure it is limited to an approved company network."
             ),
 
             "technician_recommendation": (

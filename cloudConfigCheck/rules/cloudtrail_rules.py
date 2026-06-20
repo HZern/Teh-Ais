@@ -29,12 +29,13 @@ def check_cloudtrail_baseline(trail):
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "CloudTrail logging is disabled.",
-            "risk": "The organisation may not have a reliable audit trail of who changed AWS resources and when changes occurred.",
-
+            "manager_title": "Cloud activity logging is disabled",
+            "reason": "Cloud activity logging is turned off.",
+            "risk": "The company may not have a reliable record of who changed cloud resources, when changes happened, or what actions were taken.",
+            "manager_aws_part": "CloudTrail audit logging settings",
             "manager_recommendation": (
-                "Urgent action is needed. Cloud activity for manufacturing resources may not be properly recorded. "
-                "The manager should ask the cloud or IT team to enable CloudTrail logging immediately so changes can be audited."
+                "Ask the IT or cloud team to enable cloud activity logging immediately. "
+                "This is important for investigation, accountability, and detecting unauthorised changes."
             ),
 
             "technician_recommendation": (
@@ -63,12 +64,13 @@ def check_cloudtrail_baseline(trail):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": f"CloudTrail logging is enabled, but missing: {', '.join(missing_items)}.",
-            "risk": "AWS activity is being logged, but the audit setup may not be complete enough for stronger monitoring and investigation.",
-
+            "manager_title": "Audit logging setup needs review",
+            "reason": "Cloud activity is being recorded, but the audit logging setup is incomplete.",
+            "risk": "The company may have less visibility when investigating who changed cloud resources or when changes happened.",
+            "manager_aws_part": "CloudTrail audit logging settings",
             "manager_recommendation": (
-                "Cloud activity is being recorded, but the audit setup is incomplete. The manager should ask the cloud or IT team "
-                "to improve CloudTrail settings so manufacturing cloud changes can be monitored more reliably."
+                "Ask the IT or cloud team to improve the audit logging setup. "
+                "This is not a complete logging failure, but it should be fixed so cloud changes can be monitored more reliably."
             ),
 
             "technician_recommendation": (

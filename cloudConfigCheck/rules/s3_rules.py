@@ -5,10 +5,6 @@ def check_s3_security_baseline(bucket):
     Baseline rules:
     1. The S3 bucket must not be publicly accessible.
     2. The S3 bucket must have encryption enabled.
-
-    Recommendation design:
-    - manager_recommendation: simple business-level explanation
-    - technician_recommendation: specific technical fix
     """
 
     is_public = (
@@ -19,8 +15,6 @@ def check_s3_security_baseline(bucket):
 
     encryption_missing = bucket["encryption_enabled"] is False
 
-    # Danger case:
-    # The bucket may be publicly accessible.
     if is_public:
         return {
             "resource_id": bucket["resource_id"],
@@ -33,13 +27,16 @@ def check_s3_security_baseline(bucket):
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "The S3 bucket may be publicly accessible.",
-            "risk": "Sensitive manufacturing documents, machine output files, or production records could be exposed online.",
+
+            "manager_title": "Cloud storage may be publicly accessible",
+            "manager_aws_part": "S3 cloud storage access settings",
+
+            "reason": "A cloud storage location may be accessible from the public internet.",
+            "risk": "Internal files, documents, or operational records may be viewed by people outside the company.",
 
             "manager_recommendation": (
-                "Urgent action is needed. This manufacturing storage bucket may be publicly accessible, "
-                "which could expose internal production files or machine data. The manager should notify "
-                "the cloud or IT team to restrict public access immediately."
+                "Ask the IT or cloud team to immediately block public access to this storage location "
+                "and confirm that only approved users or systems can access it."
             ),
 
             "technician_recommendation": (
@@ -49,8 +46,6 @@ def check_s3_security_baseline(bucket):
             )
         }
 
-    # Warning case:
-    # The bucket is private, but still does not fully meet the baseline.
     if encryption_missing:
         return {
             "resource_id": bucket["resource_id"],
@@ -63,13 +58,16 @@ def check_s3_security_baseline(bucket):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": "The S3 bucket is not publicly accessible, but encryption is disabled.",
-            "risk": "The bucket is not directly exposed, but stored manufacturing files are not protected according to the professional baseline.",
+
+            "manager_title": "Cloud storage needs encryption",
+            "manager_aws_part": "S3 cloud storage encryption settings",
+
+            "reason": "This cloud storage location is not open to the public, but its files are not protected with encryption.",
+            "risk": "If someone gains access to this storage location, stored files may be easier to read because encryption is not enabled.",
 
             "manager_recommendation": (
-                "This bucket is not publicly exposed, but it is still below the expected security baseline "
-                "because encryption is disabled. The manager should ask the cloud or IT team to enable "
-                "encryption to better protect manufacturing records."
+                "Ask the IT or cloud team to enable encryption for this storage location. "
+                "This is not an emergency exposure, but it should be fixed to meet the company security baseline."
             ),
 
             "technician_recommendation": (
@@ -79,8 +77,6 @@ def check_s3_security_baseline(bucket):
             )
         }
 
-    # Safe case:
-    # The bucket is private and encrypted.
     return {
         "resource_id": bucket["resource_id"],
         "resource_name": bucket["resource_name"],
@@ -92,11 +88,15 @@ def check_s3_security_baseline(bucket):
         "status": "PASSED",
         "severity": "NONE",
         "finding_type": "Safe",
-        "reason": "The S3 bucket is private and encrypted.",
+
+        "manager_title": "Cloud storage is properly protected",
+        "manager_aws_part": "S3 cloud storage settings",
+
+        "reason": "The cloud storage location is private and encrypted.",
         "risk": "No S3 baseline issue detected.",
 
         "manager_recommendation": (
-            "No management action is needed. This bucket currently meets the expected S3 security baseline."
+            "No management action is needed. This storage location currently meets the expected security baseline."
         ),
 
         "technician_recommendation": (

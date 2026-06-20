@@ -108,13 +108,14 @@ def prepare_website_alerts(findings):
 
             # Manager-level view
             "manager_view": {
-                "title": finding.get(
-                    "manager_title",
-                    f"{finding['finding_type']} alert for {finding['resource_name']}"
-                ),
-                "situation": finding["reason"],
-                "business_risk": finding["risk"],
-                "recommended_action": finding["manager_recommendation"]
+            "title": finding.get(
+                "manager_title",
+                f"{finding['finding_type']} alert for {finding['resource_name']}"
+            ),
+            "situation": finding["reason"],
+            "business_risk": finding["risk"],
+            "aws_part_to_fix": finding.get("manager_aws_part", finding["area"]),
+            "recommended_action": finding["manager_recommendation"]
             },
 
             # Technician-level view
