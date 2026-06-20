@@ -31,7 +31,7 @@ STATUS_COLORS = {
 API_URL = "http://127.0.0.1:8000/alerts"
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=10)
 def fetch_security_alerts():
     try:
         response = requests.get(API_URL, timeout=5)
@@ -130,6 +130,23 @@ st.markdown(
 
     div[data-baseweb="select"] svg {
         fill: #ffffff !important;
+    }
+
+    .view-mode-message {
+        background: #dbeafe;
+        color: #0f172a !important;
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 750;
+        border-left: 5px solid #2563eb;
+        margin-bottom: 18px;
+    }
+
+    .view-mode-message div,
+    .view-mode-message span,
+    .view-mode-message p {
+        color: #0f172a !important;
     }
 
     .security-card {
@@ -463,9 +480,19 @@ with view_col1:
 
 with view_col2:
     if is_technician_view:
-        st.info("Technical view is active. Showing resource IDs, failed rules, and technical fixes.")
+        view_message = "Technical view is active. Showing resource IDs, failed rules, and technical fixes."
     else:
-        st.info("Manager view is active. Showing business-friendly risks and recommendations.")
+        view_message = "Manager view is active. Showing business-friendly risks and recommendations."
+
+    st.markdown(
+        f"""
+<div class="view-mode-message">
+    {view_message}
+</div>
+        """,
+        unsafe_allow_html=True
+    )
+    
 
 
 # -----------------------------
