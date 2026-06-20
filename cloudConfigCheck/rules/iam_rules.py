@@ -29,19 +29,27 @@ def check_iam_user_baseline(user):
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "A non-admin IAM user has AdministratorAccess.",
+
+            "manager_title": "User has excessive cloud permissions",
+            "manager_aws_part": "IAM user permission settings",
+
+            "reason": "A user account has administrator-level cloud access even though it is not meant to be an admin user.",
             "risk": "This user may be able to change, delete, or access critical AWS resources beyond their job responsibility.",
 
             "manager_recommendation": (
-                "Urgent action is needed. A manufacturing user has administrator-level cloud access. "
-                "The manager should ask the cloud or IT team to review and reduce this user's permissions immediately."
+                "Ask the cloud or IT team to immediately review and reduce this user's permissions. "
+                "The user should only have the access required for their role."
             ),
 
-            "technician_recommendation": (
-                "In AWS IAM, remove the AdministratorAccess policy from this user. Replace it with a least-privilege "
-                "policy that only allows the actions required for the user's manufacturing role. Review whether this "
-                "user should be converted to a role-based access model instead of using long-term user credentials."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to IAM.",
+                "In the left menu, open Users.",
+                "Search for and select the IAM user shown in the resource ID.",
+                "Go to the Permissions tab.",
+                "Remove the AdministratorAccess policy from this user.",
+                "Attach a least-privilege policy that only allows the actions required for this user's role.",
+                "Review whether this user should be replaced with role-based access instead of long-term IAM user credentials."
+            ]
         }
 
     if old_access_key or unused_access_key:
@@ -56,18 +64,28 @@ def check_iam_user_baseline(user):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": "The IAM user's access key is old or has not been used recently.",
+
+            "manager_title": "Access key needs review",
+            "manager_aws_part": "IAM access key settings",
+
+            "reason": "A user's access key is old or has not been used recently.",
             "risk": "Old or unused access keys increase the risk of forgotten credentials being exposed or misused.",
 
             "manager_recommendation": (
-                "This user does not have administrator access, but the access key is old or unused. "
-                "The manager should ask the cloud or IT team to rotate or remove unnecessary access keys."
+                "Ask the cloud or IT team to review this access key. "
+                "If it is still needed, rotate it. If it is no longer needed, remove it."
             ),
 
-            "technician_recommendation": (
-                "In AWS IAM, review the user's access keys. Rotate keys older than 90 days and deactivate or delete "
-                "keys that are no longer required. Confirm that applications using the key are updated before removal."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to IAM.",
+                "In the left menu, open Users.",
+                "Search for and select the IAM user shown in the resource ID.",
+                "Go to the Security credentials tab.",
+                "Review the user's access keys.",
+                "Rotate access keys older than 90 days if they are still required.",
+                "Deactivate and delete access keys that are no longer required.",
+                "Before deleting a key, confirm that any applications using the key have been updated."
+            ]
         }
 
     return {
@@ -81,6 +99,10 @@ def check_iam_user_baseline(user):
         "status": "PASSED",
         "severity": "NONE",
         "finding_type": "Safe",
+
+        "manager_title": "User permissions are properly restricted",
+        "manager_aws_part": "IAM user permission and access key settings",
+
         "reason": "The IAM user does not have administrator access and the access key is recent.",
         "risk": "No IAM baseline issue detected.",
 

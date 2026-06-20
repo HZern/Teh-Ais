@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from datetime import datetime
+import html
 
 # ==========================================================
 # Security Manager Page
@@ -31,8 +32,6 @@ STATUS_COLORS = {
 API_URL = "http://127.0.0.1:8000/alerts"
 
 
-# Cache only for 10 seconds, matching the refresh interval.
-# If you want every refresh to call backend directly, remove this decorator.
 @st.cache_data(ttl=10)
 def fetch_security_alerts():
     try:
@@ -63,244 +62,259 @@ def fetch_security_alerts():
 # -----------------------------
 st.markdown(
     """
-    <style>
-    .main {
-        background-color: #f7fafc;
-    }
+<style>
+.main {
+    background-color: #f7fafc;
+}
 
-    .block-container {
-        padding-top: 3rem;
-        padding-bottom: 3rem;
-        max-width: 1200px;
-    }
+.block-container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    max-width: 1200px;
+}
 
-    .hero-card {
-        padding: 26px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, #0f172a 0%, #0e7490 100%);
-        color: white;
-        margin-bottom: 28px;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
-    }
+.hero-card {
+    padding: 26px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #0f172a 0%, #0e7490 100%);
+    color: white;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+}
 
-    .hero-title {
-        color: white !important;
-        font-size: 34px;
-        font-weight: 850;
-        margin-bottom: 8px;
-    }
+.hero-title {
+    color: white !important;
+    font-size: 34px;
+    font-weight: 850;
+    margin-bottom: 8px;
+}
 
-    .hero-subtitle {
-        color: white !important;
-        font-size: 16px;
-        opacity: 0.95;
-        line-height: 1.5;
-    }
+.hero-subtitle {
+    color: white !important;
+    font-size: 16px;
+    opacity: 0.95;
+    line-height: 1.5;
+}
 
-    .section-heading {
-        color: #0f172a !important;
-        font-size: 32px;
-        font-weight: 850;
-        margin-top: 10px;
-        margin-bottom: 8px;
-    }
+.section-heading {
+    color: #0f172a !important;
+    font-size: 32px;
+    font-weight: 850;
+    margin-top: 10px;
+    margin-bottom: 8px;
+}
 
-    .section-caption {
-        color: #475569 !important;
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 22px;
-    }
+.section-caption {
+    color: #475569 !important;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 22px;
+}
 
-    label,
-    [data-testid="stWidgetLabel"] p {
-        color: #0f172a !important;
-        font-weight: 750 !important;
-    }
+label,
+[data-testid="stWidgetLabel"] p {
+    color: #0f172a !important;
+    font-weight: 750 !important;
+}
 
-    div[data-baseweb="select"] > div {
-        border-radius: 12px !important;
-        background-color: #111827 !important;
-        border: 1px solid #334155 !important;
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
+div[data-baseweb="select"] > div {
+    border-radius: 12px !important;
+    background-color: #111827 !important;
+    border: 1px solid #334155 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
 
-    div[data-baseweb="select"] span {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
+div[data-baseweb="select"] span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
 
-    div[data-baseweb="select"] svg {
-        fill: #ffffff !important;
-    }
+div[data-baseweb="select"] svg {
+    fill: #ffffff !important;
+}
 
-    .view-mode-message {
-        background: #dbeafe;
-        color: #0f172a !important;
-        padding: 14px 18px;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 750;
-        border-left: 5px solid #2563eb;
-        margin-bottom: 18px;
-    }
+.view-mode-message {
+    background: #dbeafe;
+    color: #0f172a !important;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 750;
+    border-left: 5px solid #2563eb;
+    margin-bottom: 18px;
+}
 
-    .security-card {
-        background: #ffffff;
-        border: 1.5px solid #dbe3ee;
-        border-radius: 18px;
-        padding: 22px;
-        margin-top: 18px;
-        margin-bottom: 18px;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-    }
+.security-card {
+    background: #ffffff;
+    border: 1.5px solid #dbe3ee;
+    border-radius: 18px;
+    padding: 22px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
 
-    .security-card:hover {
-        border-color: #38bdf8;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-    }
+.security-card:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
 
-    .security-topline {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 18px;
-    }
+.security-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+}
 
-    .security-title {
-        color: #0f172a !important;
-        font-size: 21px;
-        font-weight: 850;
-        margin-bottom: 8px;
-    }
+.security-title {
+    color: #0f172a !important;
+    font-size: 21px;
+    font-weight: 850;
+    margin-bottom: 8px;
+}
 
-    .security-situation {
-        color: #475569 !important;
-        font-size: 15px;
-        line-height: 1.5;
-        margin-bottom: 14px;
-    }
+.security-situation {
+    color: #475569 !important;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+}
 
-    .pill {
-        display: inline-block;
-        padding: 6px 11px;
-        border-radius: 999px;
-        background: #e0f2fe;
-        color: #075985 !important;
-        font-size: 13px;
-        font-weight: 750;
-        margin-right: 7px;
-        margin-bottom: 8px;
-    }
+.pill {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985 !important;
+    font-size: 13px;
+    font-weight: 750;
+    margin-right: 7px;
+    margin-bottom: 8px;
+}
 
-    .priority-danger {
-        background: #fee2e2;
-        color: #991b1b !important;
-    }
+.priority-danger {
+    background: #fee2e2;
+    color: #991b1b !important;
+}
 
-    .priority-warning {
-        background: #fef3c7;
-        color: #92400e !important;
-    }
+.priority-warning {
+    background: #fef3c7;
+    color: #92400e !important;
+}
 
-    .priority-low {
-        background: #dcfce7;
-        color: #166534 !important;
-    }
+.priority-low {
+    background: #dcfce7;
+    color: #166534 !important;
+}
 
-    .risk-level-box {
-        min-width: 104px;
-        text-align: center;
-        padding: 12px 14px;
-        border-radius: 14px;
-        font-weight: 850;
-        font-size: 16px;
-        margin: 8px 12px 8px 0;
-    }
+.risk-level-box {
+    min-width: 104px;
+    text-align: center;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-weight: 850;
+    font-size: 16px;
+    margin: 8px 12px 8px 0;
+}
 
-    .risk-level-label {
-        display: block;
-        font-size: 11px;
-        font-weight: 650;
-        margin-top: 3px;
-    }
+.risk-level-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 650;
+    margin-top: 3px;
+}
 
-    .risk-level-danger {
-        background: #fee2e2;
-        color: #991b1b !important;
-        border: 1px solid #fecaca;
-    }
+.risk-level-danger {
+    background: #fee2e2;
+    color: #991b1b !important;
+    border: 1px solid #fecaca;
+}
 
-    .risk-level-warning {
-        background: #fef3c7;
-        color: #92400e !important;
-        border: 1px solid #fde68a;
-    }
+.risk-level-warning {
+    background: #fef3c7;
+    color: #92400e !important;
+    border: 1px solid #fde68a;
+}
 
-    .recommendation-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 18px;
-        margin-top: 18px;
-    }
+.recommendation-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 18px;
+}
 
-    .recommendation-title {
-        color: #0f172a !important;
-        font-size: 17px;
-        font-weight: 850;
-        margin-bottom: 7px;
-    }
+.recommendation-title {
+    color: #0f172a !important;
+    font-size: 17px;
+    font-weight: 850;
+    margin-bottom: 7px;
+}
 
-    .recommendation-text {
-        color: #334155 !important;
-        font-size: 15px;
-        line-height: 1.55;
-        margin-bottom: 15px;
-    }
+.recommendation-text {
+    color: #334155 !important;
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 15px;
+}
 
-    .smart-recommendation-box {
-        background: #dcfce7;
-        border-left: 5px solid #22c55e;
-        border-radius: 12px;
-        padding: 15px;
-        margin-top: 10px;
-    }
+.smart-recommendation-box {
+    background: #dcfce7;
+    border-left: 5px solid #22c55e;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 10px;
+}
 
-    .smart-recommendation-box p {
-        color: #14532d !important;
-        font-size: 15px;
-        line-height: 1.55;
-        font-weight: 650;
-        margin: 0;
-    }
+.smart-recommendation-box p {
+    color: #14532d !important;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 650;
+    margin: 0;
+}
 
-    .metric-card {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 16px;
-        border: 2px solid #cbd5e1;
-        border-top: 5px solid #0e7490;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
-        min-height: 120px;
-        margin-bottom: 24px;
-    }
+.smart-recommendation-box ul {
+    color: #14532d !important;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 24px;
+}
 
-    .metric-label {
-        color: #334155 !important;
-        font-size: 14px;
-        font-weight: 750;
-        margin-bottom: 10px;
-    }
+.smart-recommendation-box li {
+    color: #14532d !important;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 650;
+    margin-bottom: 8px;
+}
 
-    .metric-number {
-        color: #020617 !important;
-        font-size: 36px;
-        font-weight: 900;
-        line-height: 1.1;
-    }
-    </style>
+.metric-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 16px;
+    border: 2px solid #cbd5e1;
+    border-top: 5px solid #0e7490;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+    min-height: 120px;
+    margin-bottom: 24px;
+}
+
+.metric-label {
+    color: #334155 !important;
+    font-size: 14px;
+    font-weight: 750;
+    margin-bottom: 10px;
+}
+
+.metric-number {
+    color: #020617 !important;
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+</style>
     """,
     unsafe_allow_html=True
 )
@@ -350,6 +364,21 @@ def sort_security_findings(findings, sort_option):
     return findings
 
 
+def render_recommendation(value):
+    """
+    Accepts either:
+    - string recommendation
+    - list of recommendation steps
+
+    Returns safe HTML.
+    """
+    if isinstance(value, list):
+        list_items = "".join(f"<li>{html.escape(str(item))}</li>" for item in value)
+        return f"<ul>{list_items}</ul>"
+
+    return f"<p>{html.escape(str(value))}</p>"
+
+
 # -----------------------------
 # Sidebar
 # -----------------------------
@@ -378,22 +407,22 @@ with st.sidebar:
 # -----------------------------
 st.markdown(
     """
-    <div class="hero-card">
-        <div class="hero-title">Security Manager View 🔐</div>
-        <div class="hero-subtitle">
-            Review security findings in business-friendly language and view smart recommendations directly inside each card.
-        </div>
-    </div>
+<div class="hero-card">
+<div class="hero-title">Security Manager View 🔐</div>
+<div class="hero-subtitle">
+Review security findings in business-friendly language and view smart recommendations directly inside each card.
+</div>
+</div>
     """,
     unsafe_allow_html=True
 )
 
 st.markdown(
     """
-    <h2 class="section-heading">Priority Tasks & Issues</h2>
-    <div class="section-caption">
-        Security findings are shown with manager-level explanations and smart recommendations.
-    </div>
+<h2 class="section-heading">Priority Tasks & Issues</h2>
+<div class="section-caption">
+Security findings are shown with manager-level explanations and smart recommendations.
+</div>
     """,
     unsafe_allow_html=True
 )
@@ -457,9 +486,9 @@ with view_col2:
 
     st.markdown(
         f"""
-        <div class="view-mode-message">
-            {view_message}
-        </div>
+<div class="view-mode-message">
+{view_message}
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -484,10 +513,10 @@ def render_security_alert_section(
 
     st.markdown(
         f"""
-        <div class="section-caption">
-            Last updated: <b>{backend_result["last_updated"]}</b> | 
-            Backend message: {backend_result["message"]}
-        </div>
+<div class="section-caption">
+Last updated: <b>{backend_result["last_updated"]}</b> | 
+Backend message: {backend_result["message"]}
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -517,10 +546,10 @@ def render_security_alert_section(
     with summary_col1:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">Total Alerts</div>
-                <div class="metric-number">{total_alerts}</div>
-            </div>
+<div class="metric-card">
+<div class="metric-label">Total Alerts</div>
+<div class="metric-number">{total_alerts}</div>
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -528,10 +557,10 @@ def render_security_alert_section(
     with summary_col2:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">Warnings</div>
-                <div class="metric-number">{warning_count}</div>
-            </div>
+<div class="metric-card">
+<div class="metric-label">Warnings</div>
+<div class="metric-number">{warning_count}</div>
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -539,10 +568,10 @@ def render_security_alert_section(
     with summary_col3:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">Dangers</div>
-                <div class="metric-number">{danger_count}</div>
-            </div>
+<div class="metric-card">
+<div class="metric-label">Dangers</div>
+<div class="metric-number">{danger_count}</div>
+</div>
             """,
             unsafe_allow_html=True
         )
@@ -559,54 +588,63 @@ def render_security_alert_section(
         if is_technician_view:
             title = alert.get("resource_name", "Unknown resource")
             description = technician_view.get("technical_reason", "No technical reason provided.")
+            risk_label = "Failed Rule"
             risk_text = technician_view.get("rule", "No failed rule provided.")
-            recommendation = technician_view.get("technical_fix", "No technical recommendation provided.")
+            aws_part_label = "AWS Resource Type"
             aws_part = alert.get("resource_type", "Unknown AWS resource")
+
+            technical_fix = technician_view.get("technical_fix", "No technical recommendation provided.")
+            recommendation = render_recommendation(technical_fix)
+
             resource_extra = technician_view.get("resource_id", "No resource ID provided.")
+            resource_details_html = f"""
+<div class="recommendation-title">Resource Details</div>
+<div class="recommendation-text">{html.escape(str(resource_extra))}</div>
+"""
+
             card_icon = "🛠️"
             card_label = "Technician View"
+
         else:
             title = manager_view.get("title", "Security alert")
             description = manager_view.get("situation", "No situation provided.")
+            risk_label = "Risk"
             risk_text = manager_view.get("business_risk", "No business risk provided.")
-            recommendation = manager_view.get("recommended_action", "No recommendation provided.")
+            aws_part_label = "AWS Part to Fix"
             aws_part = manager_view.get("aws_part_to_fix", alert.get("area", "Unknown AWS area"))
-            resource_extra = alert.get("resource_name", "Unknown resource")
+
+            manager_recommendation = manager_view.get("recommended_action", "No recommendation provided.")
+            recommendation = render_recommendation(manager_recommendation)
+
+            resource_details_html = ""
             card_icon = "🔐"
             card_label = "Manager View"
 
         card_html = f"""
-            <div class="security-card">
-            <div class="security-topline">
-            <div>
-            <div class="security-title">{card_icon} {title}</div>
-            <div class="security-situation">{description}</div>
-            </div>
-            <div class="risk-level-box {risk_level_class(finding_type)}">
-            {finding_type}
-            <span class="risk-level-label">Risk Level</span>
-            </div>
-            </div>
-            <span class="pill {priority_class(finding_type)}">Finding Type: {finding_type}</span>
-            <span class="pill">Severity: {alert.get("severity", "N/A")}</span>
-            <span class="pill">AWS Area: {alert.get("area", "N/A")}</span>
-            <span class="pill">Resource: {alert.get("resource_name", "N/A")}</span>
-            <span class="pill">Status: {alert.get("status", "N/A")}</span>
-            <span class="pill">View: {card_label}</span>
-            <div class="recommendation-box">
-            <div class="recommendation-title">Risk</div>
-            <div class="recommendation-text">{risk_text}</div>
-            <div class="recommendation-title">AWS Part to Fix</div>
-            <div class="recommendation-text">{aws_part}</div>
-            <div class="recommendation-title">Resource Details</div>
-            <div class="recommendation-text">{resource_extra}</div>
-            <div class="recommendation-title">Smart Recommendation</div>
-            <div class="smart-recommendation-box">
-            <p>{recommendation}</p>
-            </div>
-            </div>
-            </div>
-        """
+<div class="security-card">
+<div class="security-topline">
+<div>
+<div class="security-title">{card_icon} {html.escape(str(title))}</div>
+<div class="security-situation">{html.escape(str(description))}</div>
+</div>
+<div class="risk-level-box {risk_level_class(finding_type)}">
+{html.escape(str(finding_type))}
+<span class="risk-level-label">Risk Level</span>
+</div>
+</div>
+<div class="recommendation-box">
+<div class="recommendation-title">{risk_label}</div>
+<div class="recommendation-text">{html.escape(str(risk_text))}</div>
+<div class="recommendation-title">{aws_part_label}</div>
+<div class="recommendation-text">{html.escape(str(aws_part))}</div>
+{resource_details_html}
+<div class="recommendation-title">Smart Recommendation</div>
+<div class="smart-recommendation-box">
+{recommendation}
+</div>
+</div>
+</div>
+"""
 
         st.markdown(card_html, unsafe_allow_html=True)
 

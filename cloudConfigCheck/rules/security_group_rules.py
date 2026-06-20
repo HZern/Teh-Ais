@@ -50,11 +50,16 @@ def check_security_group_ssh_baseline(security_group):
                 "bastion host, or controlled access system."
             ),
 
-            "technician_recommendation": (
-                "In the EC2 Security Group inbound rules, remove the rule that allows TCP port 22 "
-                "from 0.0.0.0/0. Restrict SSH access to an approved VPN IP range or bastion host, "
-                "or use AWS Systems Manager Session Manager instead of public SSH."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to EC2.",
+                "In the left menu, open Security Groups.",
+                "Select the security group shown in the resource ID.",
+                "Go to Inbound rules.",
+                "Find the rule that allows TCP port 22 from 0.0.0.0/0.",
+                "Delete this public SSH rule.",
+                "If SSH is still required, add a new rule that only allows access from an approved company VPN IP range or bastion host.",
+                "Consider using AWS Systems Manager Session Manager instead of public SSH access."
+            ]
         }
 
     if ssh_restricted:
@@ -81,10 +86,16 @@ def check_security_group_ssh_baseline(security_group):
                 "If it is not needed, remove it. If it is needed, ensure it is limited to an approved company network."
             ),
 
-            "technician_recommendation": (
-                "Review the EC2 Security Group inbound SSH rule. Confirm that the source IP range belongs "
-                "to an approved company VPN or bastion host. Remove the SSH rule if it is no longer needed."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to EC2.",
+                "In the left menu, open Security Groups.",
+                "Select the security group shown in the resource ID.",
+                "Go to Inbound rules.",
+                "Find the SSH rule using TCP port 22.",
+                "Check whether the source IP range belongs to an approved company VPN or bastion host.",
+                "If the SSH rule is not required anymore, delete it.",
+                "If it is still required, document why it is needed and keep the source limited to trusted networks only."
+            ]
         }
 
     return {

@@ -39,11 +39,17 @@ def check_s3_security_baseline(bucket):
                 "and confirm that only approved users or systems can access it."
             ),
 
-            "technician_recommendation": (
-                "In AWS S3, enable Block Public Access for this bucket. Review and remove any bucket policy "
-                "that allows public access, especially policies with Principal set to '*'. Disable public ACLs, "
-                "confirm the bucket is not internet-accessible, and enable default server-side encryption."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to S3.",
+                "Search for and select the bucket shown in the resource ID.",
+                "Go to the Permissions tab.",
+                "Enable Block Public Access for this bucket.",
+                "Review the bucket policy and remove any statement that allows public access, especially policies with Principal set to '*'.",
+                "Review Object Ownership and ACL settings, and disable public ACL access.",
+                "Confirm the bucket is no longer publicly accessible.",
+                "Go to the Properties tab.",
+                "Enable default server-side encryption using SSE-S3 or SSE-KMS, depending on company policy."
+            ]
         }
 
     if encryption_missing:
@@ -70,11 +76,16 @@ def check_s3_security_baseline(bucket):
                 "This is not an emergency exposure, but it should be fixed to meet the company security baseline."
             ),
 
-            "technician_recommendation": (
-                "In AWS S3, enable default server-side encryption for this bucket. Use SSE-S3 or SSE-KMS "
-                "depending on company policy. After enabling encryption, verify that future uploaded objects "
-                "are encrypted by default."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to S3.",
+                "Search for and select the bucket shown in the resource ID.",
+                "Go to the Properties tab.",
+                "Find Default encryption.",
+                "Enable default server-side encryption.",
+                "Choose SSE-S3 or SSE-KMS depending on company policy.",
+                "Save the encryption setting.",
+                "Upload or check a test object to confirm future objects are encrypted by default."
+            ]
         }
 
     return {

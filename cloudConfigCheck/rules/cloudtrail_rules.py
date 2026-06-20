@@ -38,10 +38,14 @@ def check_cloudtrail_baseline(trail):
                 "This is important for investigation, accountability, and detecting unauthorised changes."
             ),
 
-            "technician_recommendation": (
-                "In AWS CloudTrail, enable logging for this trail. Ensure the trail records management events, stores logs in a protected S3 bucket, "
-                "and enable multi-region logging and log file validation where required by company policy."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to CloudFront.",
+                "Select the distribution shown in the resource ID.",
+                "Check the viewer protocol policy.",
+                "Change the viewer protocol policy to Redirect HTTP to HTTPS or HTTPS only.",
+                "Attach or verify a valid TLS certificate.",
+                "Save the change and test that HTTP traffic is redirected to HTTPS."
+            ]
         }
 
     if multi_region_missing or validation_missing:
@@ -73,10 +77,14 @@ def check_cloudtrail_baseline(trail):
                 "This is not a complete logging failure, but it should be fixed so cloud changes can be monitored more reliably."
             ),
 
-            "technician_recommendation": (
-                "Review the CloudTrail configuration. Enable multi-region logging if the AWS account uses or may use multiple regions. "
-                "Enable log file validation to help verify that logs have not been changed after delivery."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to API Gateway.",
+                "Select the API shown in the resource ID.",
+                "Go to stage settings or logging settings.",
+                "Enable access logging or execution logging.",
+                "Send logs to CloudWatch Logs or another approved logging destination.",
+                "Confirm that logs are being generated after requests are made."
+            ]
         }
 
     return {

@@ -25,22 +25,34 @@ def check_rds_database_baseline(database):
             "team": database["team"],
             "case_type": database["case_type"],
             "area": "RDS",
-            "rule": "Project/manufacturing databases must not be public",
+            "rule": "Databases must not be publicly accessible",
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "The RDS database is publicly accessible from the internet.",
-            "risk": "Internal manufacturing database records could be exposed or targeted from outside the company.",
+
+            "manager_title": "Database may be publicly reachable",
+            "manager_aws_part": "RDS database public access settings",
+
+            "reason": "A cloud database may be reachable from the public internet.",
+            "risk": "Internal database records could be exposed or targeted by people outside the company.",
 
             "manager_recommendation": (
-                "Urgent action is needed. A manufacturing database may be reachable from the internet. "
-                "The manager should ask the cloud or IT team to make the database private immediately."
+                "Ask the IT or cloud team to immediately make this database private. "
+                "The database should only be reachable by approved internal applications or systems."
             ),
 
-            "technician_recommendation": (
-                "In AWS RDS, disable Publicly Accessible for this database. Place the database in private subnets, "
-                "restrict its security group to only approved application servers, enable encryption, and enable automated backups."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to RDS.",
+                "In the left menu, open Databases.",
+                "Select the database shown in the resource ID.",
+                "Check the Connectivity & security settings.",
+                "Disable the Publicly Accessible setting for this database.",
+                "Place the database in private subnets.",
+                "Restrict the database security group so only approved application servers can connect.",
+                "Enable storage encryption if supported by the database setup.",
+                "Enable automated backups with an appropriate retention period.",
+                "Save the changes and confirm the database is no longer reachable from the public internet."
+            ]
         }
 
     if encryption_missing or backup_missing:
@@ -63,18 +75,29 @@ def check_rds_database_baseline(database):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": f"The RDS database is private, but missing: {', '.join(missing_items)}.",
-            "risk": "The database is not publicly exposed, but stored manufacturing data is not fully protected according to the expected baseline.",
+
+            "manager_title": "Database protection needs review",
+            "manager_aws_part": "RDS database protection settings",
+
+            "reason": f"The database is private, but missing: {', '.join(missing_items)}.",
+            "risk": "The database is not publicly exposed, but stored company data is not fully protected according to the expected baseline.",
 
             "manager_recommendation": (
-                "This manufacturing database is not publicly exposed, but it is still below the expected security baseline. "
-                "The manager should ask the cloud or IT team to review database protection settings."
+                "Ask the IT or cloud team to review this database protection setup. "
+                "The database is not publicly exposed, but encryption and backup settings should meet the company security baseline."
             ),
 
-            "technician_recommendation": (
-                "In AWS RDS, enable storage encryption if supported by the database setup. Ensure automated backups are enabled "
-                "with an appropriate retention period. Confirm that the database remains in private subnets and is not publicly accessible."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to RDS.",
+                "In the left menu, open Databases.",
+                "Select the database shown in the resource ID.",
+                "Check whether storage encryption is enabled.",
+                "If encryption is missing, enable storage encryption if supported by the database setup.",
+                "Check whether automated backups are enabled.",
+                "If backups are missing, enable automated backups with an appropriate retention period.",
+                "Confirm that the database remains in private subnets.",
+                "Confirm that Publicly Accessible is disabled."
+            ]
         }
 
     return {
@@ -88,7 +111,11 @@ def check_rds_database_baseline(database):
         "status": "PASSED",
         "severity": "NONE",
         "finding_type": "Safe",
-        "reason": "The RDS database is private, encrypted, and has backups enabled.",
+
+        "manager_title": "Database is properly protected",
+        "manager_aws_part": "RDS database protection settings",
+
+        "reason": "The database is private, encrypted, and has backups enabled.",
         "risk": "No RDS baseline issue detected.",
 
         "manager_recommendation": (

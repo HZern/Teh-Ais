@@ -26,19 +26,29 @@ def check_lambda_role_baseline(function):
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "The Lambda function role has administrator-level permissions.",
+
+            "manager_title": "Serverless function has excessive permissions",
+            "manager_aws_part": "Lambda function role permission settings",
+
+            "reason": "A serverless function has administrator-level cloud permissions.",
             "risk": "If this small function is misused or compromised, it may be able to access or change critical AWS resources.",
 
             "manager_recommendation": (
-                "Urgent action is needed. A manufacturing serverless function has excessive cloud access. "
-                "The manager should ask the cloud or IT team to reduce the function role permissions immediately."
+                "Ask the cloud or IT team to immediately reduce this function's permissions. "
+                "The function should only have the access required to perform its specific task."
             ),
 
-            "technician_recommendation": (
-                "In AWS IAM, review the execution role attached to this Lambda function. Remove AdministratorAccess "
-                "or any unnecessary broad policies. Replace them with a least-privilege custom policy that only allows "
-                "the exact AWS actions and resources required by the function."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to Lambda.",
+                "Search for and select the Lambda function shown in the resource ID.",
+                "Open the Configuration tab.",
+                "Go to Permissions.",
+                "Click the execution role linked to this Lambda function.",
+                "In IAM, review the policies attached to the execution role.",
+                "Remove AdministratorAccess or any unnecessary broad policies.",
+                "Create or attach a least-privilege policy that only allows the exact AWS actions and resources required by the function.",
+                "Save the permission changes and test that the Lambda function still works correctly."
+            ]
         }
 
     if has_wildcard_permissions:
@@ -53,19 +63,29 @@ def check_lambda_role_baseline(function):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
-            "reason": "The Lambda function role has broader permissions than needed.",
+
+            "manager_title": "Serverless permissions need review",
+            "manager_aws_part": "Lambda function role permission settings",
+
+            "reason": "A serverless function has broader cloud permissions than it likely needs.",
             "risk": "The function does not have full administrator access, but its permissions may still be wider than necessary.",
 
             "manager_recommendation": (
-                "This serverless function is not fully dangerous, but its cloud permissions may be too broad. "
-                "The manager should ask the cloud or IT team to review whether the function really needs these permissions."
+                "Ask the cloud or IT team to review whether this function really needs these permissions. "
+                "Unnecessary broad permissions should be replaced with more specific access."
             ),
 
-            "technician_recommendation": (
-                "Review the Lambda execution role and attached policies. Replace broad managed policies such as "
-                "AmazonS3FullAccess with narrower custom policies, for example read or write access only to the specific "
-                "S3 bucket required by the function."
-            )
+            "technician_recommendation": [
+                "Open AWS Console and go to Lambda.",
+                "Search for and select the Lambda function shown in the resource ID.",
+                "Open the Configuration tab.",
+                "Go to Permissions.",
+                "Click the execution role linked to this Lambda function.",
+                "In IAM, review the policies attached to the execution role.",
+                "Look for broad policies such as AmazonS3FullAccess or wildcard permissions.",
+                "Replace broad permissions with a narrower custom policy, such as read-only or write-only access to the specific S3 bucket required by the function.",
+                "Save the permission changes and test that the Lambda function still works correctly."
+            ]
         }
 
     return {
@@ -79,7 +99,11 @@ def check_lambda_role_baseline(function):
         "status": "PASSED",
         "severity": "NONE",
         "finding_type": "Safe",
-        "reason": "The Lambda function role follows least privilege.",
+
+        "manager_title": "Serverless permissions are properly restricted",
+        "manager_aws_part": "Lambda function role permission settings",
+
+        "reason": "The serverless function role follows least privilege.",
         "risk": "No Lambda permission baseline issue detected.",
 
         "manager_recommendation": (
