@@ -2,12 +2,14 @@ import json
 from pathlib import Path
 from datetime import datetime
 from rules.s3_rules import check_s3_security_baseline
+from rules.security_group_rules import check_security_group_ssh_baseline 
 
-
+## Directories
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "sample_s3_buckets.json"
+SECURITY_GROUP_DATA_FILE = BASE_DIR / "data" / "sample_security_groups.json"
 
-
+# Load s3 buckets
 def load_s3_buckets():
     """
     Loads the sample AWS-style S3 bucket configuration data.
@@ -15,17 +17,29 @@ def load_s3_buckets():
     with open(DATA_FILE, "r") as file:
         return json.load(file)
 
+# Load security groups
+def load_security_groups():
+    """
+    Loads sample AWS-style EC2 Security Group configuration data.
+    """
+    with open(SECURITY_GROUP_DATA_FILE, "r") as file:
+        return json.load(file)
+    
+
 
 def run_checks():
     """
-    Runs the S3 security baseline rule against all sample S3 buckets.
+    Runs all cloud security baseline checks.
     """
-    buckets = load_s3_buckets()
     findings = []
 
-    for bucket in buckets:
-        result = check_s3_security_baseline(bucket)
-        findings.append(result)
+    s3_buckets = load_s3_buckets()
+    for bucket in s3_buckets:
+        findings.append(check_s3_security_baseline(bucket))
+
+    security_groups = load_security_groups()
+    for security_group in security_groups:
+        findings.append(check_security_group_ssh_baseline(security_group))
 
     return findings
 
