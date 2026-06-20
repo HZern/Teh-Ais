@@ -3,11 +3,14 @@ from pathlib import Path
 from datetime import datetime
 from rules.s3_rules import check_s3_security_baseline
 from rules.security_group_rules import check_security_group_ssh_baseline 
+from rules.iam_rules import check_iam_user_baseline
 
 ## Directories
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "sample_s3_buckets.json"
 SECURITY_GROUP_DATA_FILE = BASE_DIR / "data" / "sample_security_groups.json"
+IAM_DATA_FILE = BASE_DIR / "data" / "sample_iam_users.json"
+
 
 # Load s3 buckets
 def load_s3_buckets():
@@ -24,8 +27,14 @@ def load_security_groups():
     """
     with open(SECURITY_GROUP_DATA_FILE, "r") as file:
         return json.load(file)
-    
 
+# Load iam users
+def load_iam_users():
+    """
+    Loads sample AWS-style IAM user configuration data.
+    """
+    with open(IAM_DATA_FILE, "r") as file:
+        return json.load(file)
 
 def run_checks():
     """
@@ -41,8 +50,11 @@ def run_checks():
     for security_group in security_groups:
         findings.append(check_security_group_ssh_baseline(security_group))
 
-    return findings
+    iam_users = load_iam_users()
+    for user in iam_users:
+        findings.append(check_iam_user_baseline(user))
 
+    return findings
 
 def prepare_website_alerts(findings):
     """
