@@ -1,0 +1,35 @@
+[
+  {
+    "case_type": "safe",
+    "description": "Correctly configured public endpoint. HTTPS and logging are enabled.",
+    "resource_id": "arn:aws:cloudfront::123456789012:distribution/E1SAFE123456789",
+    "resource_name": "hilti-manufacturing-supplier-portal-safe",
+    "resource_type": "AWS::CloudFront::Distribution",
+    "team": "Manufacturing",
+    "business_context": "Public supplier portal used by manufacturing partners to access approved production documents and updates.",
+    "https_enabled": true,
+    "logging_enabled": true
+  },
+  {
+    "case_type": "warning",
+    "description": "Public endpoint uses HTTPS, but logging is disabled. The endpoint is protected in transit, but activity monitoring is incomplete.",
+    "resource_id": "arn:aws:apigateway:eu-west-1::/restapis/api-warning",
+    "resource_name": "hilti-manufacturing-supplier-api-warning",
+    "resource_type": "AWS::ApiGateway::RestApi",
+    "team": "Manufacturing",
+    "business_context": "Public API used by manufacturing suppliers to submit delivery and production update data.",
+    "https_enabled": true,
+    "logging_enabled": false
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous public endpoint misconfiguration. HTTPS is disabled and logging is disabled.",
+    "resource_id": "arn:aws:cloudfront::123456789012:distribution/E1DANGER1234567",
+    "resource_name": "hilti-manufacturing-customer-portal-danger",
+    "resource_type": "AWS::CloudFront::Distribution",
+    "team": "Manufacturing",
+    "business_context": "Public customer-facing portal connected to manufacturing order and production status information.",
+    "https_enabled": false,
+    "logging_enabled": false
+  }
+]
