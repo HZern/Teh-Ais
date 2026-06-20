@@ -37,13 +37,17 @@ def check_security_group_ssh_baseline(security_group):
             "status": "FAILED",
             "severity": "HIGH",
             "finding_type": "Danger",
-            "reason": "SSH access is open to the entire internet.",
-            "risk": "Attackers may attempt remote admin access to the manufacturing server.",
+
+            "manager_title": "Server admin access may be exposed online",
+            "manager_aws_part": "Server firewall access settings",
+
+            "reason": "A server may allow administrator access from the public internet.",
+            "risk": "People outside the company may be able to attempt remote access to this server, increasing the risk of unauthorised control.",
 
             "manager_recommendation": (
-                "Urgent action is needed. The firewall rules protecting this manufacturing server "
-                "allow SSH admin access from the internet. The manager should ask the cloud or IT team "
-                "to restrict SSH access immediately."
+                "Ask the IT or cloud team to immediately block public admin access to this server. "
+                "Admin access should only be allowed through approved secure methods, such as a company VPN, "
+                "bastion host, or controlled access system."
             ),
 
             "technician_recommendation": (
@@ -65,6 +69,7 @@ def check_security_group_ssh_baseline(security_group):
             "status": "FLAGGED",
             "severity": "MEDIUM",
             "finding_type": "Warning",
+
             "manager_title": "Server access needs review",
             "manager_aws_part": "Server firewall access settings",
 
@@ -93,11 +98,15 @@ def check_security_group_ssh_baseline(security_group):
         "status": "PASSED",
         "severity": "NONE",
         "finding_type": "Safe",
+
+        "manager_title": "Server access is properly restricted",
+        "manager_aws_part": "Server firewall access settings",
+
         "reason": "SSH is not open in this security group.",
         "risk": "No SSH exposure detected.",
 
         "manager_recommendation": (
-            "No management action is needed. This security group does not expose SSH access."
+            "No management action is needed. This server firewall configuration does not expose SSH access."
         ),
 
         "technician_recommendation": (
