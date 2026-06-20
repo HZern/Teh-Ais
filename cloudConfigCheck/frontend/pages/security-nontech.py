@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 from datetime import datetime
 
 # ==========================================================
@@ -14,91 +15,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# -----------------------------
-# Dummy Security Data
-# Replace later with backend/API/security scan data
-# -----------------------------
-SECURITY_FINDINGS = [
-    {
-        "id": 1,
-        "risk": "Danger",
-        "status": "Open",
-        "finding_type": "Public Storage",
-        "resource_name": "bim-project-files-bucket",
-        "manager_view": {
-            "title": "Public Storage alert for bim-project-files-bucket",
-            "situation": "A storage bucket containing BIM and construction project files is publicly accessible.",
-            "business_risk": "Sensitive project documents may be exposed to unauthorized users, increasing the risk of data leakage, contractual issues, and client trust loss.",
-            "recommended_action": "Restrict public access immediately and allow access only to approved project team members."
-        }
-    },
-    {
-        "id": 2,
-        "risk": "Danger",
-        "status": "Open",
-        "finding_type": "CVE",
-        "resource_name": "construction-db-prod",
-        "manager_view": {
-            "title": "CVE alert for construction-db-prod",
-            "situation": "The production database is running a version affected by a known security vulnerability.",
-            "business_risk": "Operational data could be compromised if the vulnerability is exploited, potentially disrupting construction workflows and exposing project information.",
-            "recommended_action": "Ask the engineering team to schedule an urgent patch window and confirm that a backup exists before patching."
-        }
-    },
-    {
-        "id": 3,
-        "risk": "Warning",
-        "status": "In Progress",
-        "finding_type": "Misconfiguration",
-        "resource_name": "site-monitoring-api",
-        "manager_view": {
-            "title": "Misconfiguration alert for site-monitoring-api",
-            "situation": "The API service allows broader network access than required.",
-            "business_risk": "Attackers may have more opportunities to access internal construction workflow systems or site monitoring data.",
-            "recommended_action": "Limit access to approved networks and request a firewall rule review from the engineering team."
-        }
-    },
-    {
-        "id": 4,
-        "risk": "Warning",
-        "status": "Open",
-        "finding_type": "Identity Access",
-        "resource_name": "project-admin-role",
-        "manager_view": {
-            "title": "Identity Access alert for project-admin-role",
-            "situation": "An admin role has more permissions than required for daily project operations.",
-            "business_risk": "Excessive permissions increase the impact of accidental misuse or compromised accounts.",
-            "recommended_action": "Review the role and apply least-privilege access so users only have the permissions they need."
-        }
-    },
-    {
-        "id": 5,
-        "risk": "Low",
-        "status": "Open",
-        "finding_type": "Logging",
-        "resource_name": "audit-log-service",
-        "manager_view": {
-            "title": "Logging alert for audit-log-service",
-            "situation": "Some security logs are not retained for the recommended duration.",
-            "business_risk": "The team may have limited visibility when investigating past incidents or compliance questions.",
-            "recommended_action": "Extend log retention and ensure audit logs are enabled for key cloud resources."
-        }
-    },
-    {
-        "id": 6,
-        "risk": "Low",
-        "status": "Resolved",
-        "finding_type": "Access Review",
-        "resource_name": "temporary-contractor-account",
-        "manager_view": {
-            "title": "Access Review alert for temporary-contractor-account",
-            "situation": "A temporary contractor account was still active after the expected project access period.",
-            "business_risk": "Inactive or outdated accounts can increase the chance of unauthorized access if not removed on time.",
-            "recommended_action": "Confirm the user no longer needs access and remove or disable the account."
-        }
-    }
-]
-
 PRIORITY_ORDER = {
     "Danger": 1,
     "Warning": 2,
@@ -108,8 +24,36 @@ PRIORITY_ORDER = {
 STATUS_COLORS = {
     "Open": "🔴",
     "In Progress": "🟠",
-    "Resolved": "🟢"
+    "Resolved": "🟢",
+    "Flagged": "🔴",
 }
+
+API_URL = "http://127.0.0.1:8000/alerts"
+
+
+@st.cache_data(ttl=60)
+def fetch_security_alerts():
+    try:
+        response = requests.get(API_URL, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        return {
+            "alerts": data.get("alerts", []),
+            "count": data.get("count", 0),
+            "message": data.get("message", "Scanner returned alerts"),
+            "error": None,
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
+
+    except requests.exceptions.RequestException as error:
+        return {
+            "alerts": [],
+            "count": 0,
+            "message": "Failed to connect to backend",
+            "error": str(error),
+            "last_updated": datetime.now().strftime("%I:%M:%S %p")
+        }
 
 # -----------------------------
 # Styling
@@ -324,12 +268,44 @@ st.markdown(
         margin: 0;
     }
 
+    .metric-card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 16px;
+        border: 2px solid #cbd5e1;
+        border-top: 5px solid #0e7490;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+        min-height: 120px;
+        margin-bottom: 24px;
+    }
+
+    .metric-label {
+        color: #334155 !important;
+        font-size: 14px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .metric-number {
+        color: #020617 !important;
+        font-size: 36px;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
     .sidebar-note {
         color: #cbd5e1 !important;
         font-size: 13px;
         line-height: 1.5;
     }
     </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <meta http-equiv="refresh" content="10">
     """,
     unsafe_allow_html=True
 )
@@ -342,8 +318,6 @@ def priority_class(risk):
         return "priority-danger"
     if risk == "Warning":
         return "priority-warning"
-    if risk == "Low":
-        return "priority-low"
     return ""
 
 
@@ -352,23 +326,30 @@ def risk_level_class(risk):
         return "risk-level-danger"
     if risk == "Warning":
         return "risk-level-warning"
-    if risk == "Low":
-        return "risk-level-low"
     return ""
 
 
 def sort_security_findings(findings, sort_option):
+    risk_order = {
+        "Danger": 1,
+        "Warning": 2
+    }
+
     if sort_option == "Risk: Danger first":
-        return sorted(findings, key=lambda x: PRIORITY_ORDER[x["risk"]])
+        return sorted(
+            findings,
+            key=lambda x: risk_order.get(x.get("finding_type", "Warning"), 99)
+        )
 
-    if sort_option == "Risk: Low first":
-        return sorted(findings, key=lambda x: PRIORITY_ORDER[x["risk"]], reverse=True)
+    if sort_option == "Risk: Warning first":
+        return sorted(
+            findings,
+            key=lambda x: risk_order.get(x.get("finding_type", "Warning"), 99),
+            reverse=True
+        )
 
-    if sort_option == "Finding Type A-Z":
-        return sorted(findings, key=lambda x: x["finding_type"])
-
-    if sort_option == "Status A-Z":
-        return sorted(findings, key=lambda x: x["status"])
+    if sort_option == "AWS Area A-Z":
+        return sorted(findings, key=lambda x: x.get("area", ""))
 
     return findings
 
@@ -422,21 +403,41 @@ st.markdown(
 )
 
 # -----------------------------
+# Fetch alerts
+# -----------------------------
+backend_result = fetch_security_alerts()
+alerts = backend_result["alerts"]
+
+if backend_result["error"]:
+    st.error("Backend is not connected. Please start the backend using `python3 security_backend.py`.")
+    st.caption(backend_result["error"])
+
+st.markdown(
+    f"""
+    <div class="section-caption">
+        Last updated: <b>{backend_result["last_updated"]}</b> | 
+        Backend message: {backend_result["message"]}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# -----------------------------
 # Filters
 # -----------------------------
 filter_col1, filter_col2, filter_col3 = st.columns([1.2, 1.2, 1.6])
 
 with filter_col1:
-    selected_finding_type = st.selectbox(
-        "Filter by finding type",
-        ["All", "Public Storage", "CVE", "Misconfiguration", "Identity Access", "Logging", "Access Review"],
-        key="security_finding_type_filter"
+    selected_area = st.selectbox(
+        "Filter by AWS area",
+        ["All"] + sorted(list(set(alert.get("area", "Unknown") for alert in alerts))),
+        key="security_area_filter"
     )
 
 with filter_col2:
     selected_security_risk = st.selectbox(
         "Filter by risk",
-        ["All", "Danger", "Warning", "Low"],
+        ["All", "Danger", "Warning"],
         key="security_risk_filter"
     )
 
@@ -445,28 +446,44 @@ with filter_col3:
         "Arrange tasks by",
         [
             "Risk: Danger first",
-            "Risk: Low first",
-            "Finding Type A-Z",
-            "Status A-Z"
+            "Risk: Warning first",
+            "AWS Area A-Z"
         ],
         key="security_sort_filter"
     )
 
 # -----------------------------
+# Manager/Technician Toggle
+# -----------------------------
+
+view_col1, view_col2 = st.columns([1, 3])
+
+with view_col1:
+    is_technician_view = st.toggle("Technician View", value=False)
+
+with view_col2:
+    if is_technician_view:
+        st.info("Technical view is active. Showing resource IDs, failed rules, and technical fixes.")
+    else:
+        st.info("Manager view is active. Showing business-friendly risks and recommendations.")
+
+
+# -----------------------------
 # Apply Filters
 # -----------------------------
-filtered_findings = SECURITY_FINDINGS
 
-if selected_finding_type != "All":
+filtered_findings = alerts
+
+if selected_area != "All":
     filtered_findings = [
-        finding for finding in filtered_findings
-        if finding["finding_type"] == selected_finding_type
+        alert for alert in filtered_findings
+        if alert.get("area") == selected_area
     ]
 
 if selected_security_risk != "All":
     filtered_findings = [
-        finding for finding in filtered_findings
-        if finding["risk"] == selected_security_risk
+        alert for alert in filtered_findings
+        if alert.get("finding_type") == selected_security_risk
     ]
 
 filtered_findings = sort_security_findings(filtered_findings, security_sort_option)
@@ -474,36 +491,102 @@ filtered_findings = sort_security_findings(filtered_findings, security_sort_opti
 # -----------------------------
 # Security Cards
 # -----------------------------
+total_alerts = len(alerts)
+warning_count = len([alert for alert in alerts if alert.get("finding_type") == "Warning"])
+danger_count = len([alert for alert in alerts if alert.get("finding_type") == "Danger"])
+
+summary_col1, summary_col2, summary_col3 = st.columns(3)
+
+with summary_col1:
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">Total Alerts</div>
+            <div class="metric-number">{total_alerts}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with summary_col2:
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">Warnings</div>
+            <div class="metric-number">{warning_count}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with summary_col3:
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">Dangers</div>
+            <div class="metric-number">{danger_count}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 if not filtered_findings:
-    st.warning("No security findings match the current filters.")
+    st.warning("No security alerts match the current filters.")
 else:
-    for finding in filtered_findings:
-        manager_view = finding["manager_view"]
+    for alert in filtered_findings:
+        finding_type = alert.get("finding_type", "Warning")
+        manager_view = alert.get("manager_view", {})
+        technician_view = alert.get("technician_view", {})
+
+        if is_technician_view:
+            title = alert.get("resource_name", "Unknown resource")
+            description = technician_view.get("technical_reason", "No technical reason provided.")
+            risk_text = technician_view.get("rule", "No failed rule provided.")
+            recommendation = technician_view.get("technical_fix", "No technical recommendation provided.")
+            aws_part = alert.get("resource_type", "Unknown AWS resource")
+            resource_extra = technician_view.get("resource_id", "No resource ID provided.")
+            card_icon = "🛠️"
+            card_label = "Technician View"
+        else:
+            title = manager_view.get("title", "Security alert")
+            description = manager_view.get("situation", "No situation provided.")
+            risk_text = manager_view.get("business_risk", "No business risk provided.")
+            recommendation = manager_view.get("recommended_action", "No recommendation provided.")
+            aws_part = alert.get("area", "Unknown AWS area")
+            resource_extra = alert.get("resource_name", "Unknown resource")
+            card_icon = "🔐"
+            card_label = "Manager View"
 
         card_html = f"""
 <div class="security-card">
-    <div class="security-topline">
-        <div>
-            <div class="security-title">🔐 {manager_view["title"]}</div>
-            <div class="security-situation">{manager_view["situation"]}</div>
-        </div>
-        <div class="risk-level-box {risk_level_class(finding["risk"])}">
-            {finding["risk"]}
-            <span class="risk-level-label">Risk Level</span>
-        </div>
-    </div>
-    <span class="pill {priority_class(finding["risk"])}">Risk: {finding["risk"]}</span>
-    <span class="pill">Status: {STATUS_COLORS[finding["status"]]} {finding["status"]}</span>
-    <span class="pill">Finding Type: {finding["finding_type"]}</span>
-    <span class="pill">Resource: {finding["resource_name"]}</span>
-    <div class="recommendation-box">
-        <div class="recommendation-title">Business Risk</div>
-        <div class="recommendation-text">{manager_view["business_risk"]}</div>
-        <div class="recommendation-title">Smart Recommendation</div>
-        <div class="smart-recommendation-box">
-            <p>{manager_view["recommended_action"]}</p>
-        </div>
-    </div>
+<div class="security-topline">
+<div>
+<div class="security-title">{card_icon} {title}</div>
+<div class="security-situation">{description}</div>
+</div>
+<div class="risk-level-box {risk_level_class(finding_type)}">
+{finding_type}
+<span class="risk-level-label">Risk Level</span>
+</div>
+</div>
+<span class="pill {priority_class(finding_type)}">Finding Type: {finding_type}</span>
+<span class="pill">Severity: {alert.get("severity", "N/A")}</span>
+<span class="pill">AWS Area: {alert.get("area", "N/A")}</span>
+<span class="pill">Resource: {alert.get("resource_name", "N/A")}</span>
+<span class="pill">Status: {alert.get("status", "N/A")}</span>
+<span class="pill">View: {card_label}</span>
+<div class="recommendation-box">
+<div class="recommendation-title">Risk</div>
+<div class="recommendation-text">{risk_text}</div>
+<div class="recommendation-title">AWS Part to Fix</div>
+<div class="recommendation-text">{aws_part}</div>
+<div class="recommendation-title">Resource Details</div>
+<div class="recommendation-text">{resource_extra}</div>
+<div class="recommendation-title">Smart Recommendation</div>
+<div class="smart-recommendation-box">
+<p>{recommendation}</p>
+</div>
+</div>
 </div>
 """
 
