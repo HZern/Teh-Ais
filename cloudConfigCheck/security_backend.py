@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -181,7 +182,7 @@ def build_co2_timeseries(days=30):
     recommendations = load_ml_recommendations()
     calculator = SustainabilityCalculator()
 
-    daily_co2_kg = 0.0
+    estimated_daily_co2_kg = 0.0
     for recommendation in recommendations:
         region = recommendation.get(
             "aws_region",
@@ -190,16 +191,30 @@ def build_co2_timeseries(days=30):
         wasted_kwh_day = float(
             recommendation.get("estimated_wasted_energy_kwh_per_day", 0.0)
         )
-        daily_co2_kg += wasted_kwh_day * calculator._carbon_intensity(region)
+        estimated_daily_co2_kg += wasted_kwh_day * calculator._carbon_intensity(region)
 
     end_date = datetime.now().date()
     points = []
 
     for day_index in range(days):
         point_date = end_date - timedelta(days=days - day_index - 1)
-        weekday_factor = 1 + ((point_date.weekday() - 3) * 0.025)
-        trend_factor = 1 + ((day_index - days + 1) * 0.003)
-        co2_kg = max(daily_co2_kg * weekday_factor * trend_factor, 0.0)
+        is_weekend = point_date.weekday() >= 5
+
+        trend_factor = 1 + (day_index * 0.002)
+        weekly_cycle = 1 + (0.035 * math.sin(day_index / 2.8))
+        operational_noise = 1 + (0.018 * math.sin(day_index * 1.7))
+        weekend_factor = 0.88 if is_weekend else 1.0
+        spike_factor = 1.09 if day_index in {12, 13, 14} else 1.0
+
+        co2_kg = max(
+            estimated_daily_co2_kg
+            * trend_factor
+            * weekly_cycle
+            * operational_noise
+            * weekend_factor
+            * spike_factor,
+            0.0,
+        )
 
         points.append({
             "date": point_date.isoformat(),
@@ -210,13 +225,14 @@ def build_co2_timeseries(days=30):
         "points": points,
         "count": len(points),
         "message": (
-            "Estimated CO2e produced from avoidable cloud workload waste over "
+            "Demo CO2e trend for avoidable cloud workload waste over "
             f"the last {days} days"
         ),
         "unit": "kg CO2e",
         "method": (
-            "estimated_wasted_energy_kwh_per_day multiplied by AWS regional "
-            "carbon intensity; trend is generated from current ML workload data"
+            "demo time series based on ML estimated wasted energy, regional "
+            "carbon intensity, weekday/weekend workload patterns, and a small "
+            "simulated workload spike"
         ),
     }
 

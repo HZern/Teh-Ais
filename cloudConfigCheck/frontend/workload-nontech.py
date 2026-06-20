@@ -607,7 +607,7 @@ if st.session_state.page == "dashboard":
         """
         <h2 class="section-heading">CO2 Produced Over Time</h2>
         <div class="section-caption">
-            Estimated CO2e produced from avoidable workload waste across the cloud environment.
+            Demo trend of estimated CO2e produced from avoidable workload waste across the cloud environment.
         </div>
         """,
         unsafe_allow_html=True
