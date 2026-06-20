@@ -144,16 +144,16 @@ st.markdown(
         font-size: 16px !important;
     }
 
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(.task-card-marker) {
+    div[class*="st-key-task_card_"] {
         background: #ffffff !important;
         border: 1.5px solid #dbe3ee !important;
         border-radius: 18px !important;
-        padding: 18px !important;
+        padding: 20px !important;
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08) !important;
         margin-bottom: 22px !important;
     }
 
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(.task-card-marker):hover {
+    div[class*="st-key-task_card_"]:hover {
         border-color: #38bdf8 !important;
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
     }
@@ -641,10 +641,8 @@ if st.session_state.page == "dashboard":
     if not filtered_tasks:
         st.warning("No tasks match the current filters.")
     else:
-        for task in filtered_tasks:
-            with st.container(border=True):
-                st.markdown('<div class="task-card-marker"></div>', unsafe_allow_html=True)
-
+        for task_index, task in enumerate(filtered_tasks):
+            with st.container(key=f"task_card_{task_index}", border=False):
                 top_left, top_right = st.columns([6, 1])
 
                 with top_left:

@@ -54,16 +54,16 @@ Use Python 3.10+.
 From the repo root:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 python3 -m pip install --upgrade pip
 ```
 
 On Windows PowerShell:
 
 ```bash
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 ```
 
@@ -111,6 +111,16 @@ ai/sustainability_calculator.py
 ai/generate_dashboard_output.py
 ```
 
+## 3. Optional: Run The ML Pipeline
+
+Run these from the repo root if you need to regenerate `ml-pipeline/resource_recommendations.json`:
+
+```bash
+python3 ml-pipeline/01_load_and_join.py
+python3 ml-pipeline/02_features_and_labels.py
+python3 ml-pipeline/03_train_models.py
+python3 ml-pipeline/04_generate_output.py
+```
 
 The backend reads:
 
@@ -128,24 +138,72 @@ python3 ai/generate_dashboard_output.py \
   --output person5_dashboard_output.json
 ```
 
+## 5. Run The Backend
+
+Open Terminal 1 from the repo root:
+
+```bash
+source venv/bin/activate
+cd cloudConfigCheck
+python3 security_backend.py
+```
+
+The backend runs at:
+
+```text
+http://127.0.0.1:8000
+```
+
+Useful endpoints:
+
+```text
+http://127.0.0.1:8000/alerts
+http://127.0.0.1:8000/workload-tasks
+http://127.0.0.1:8000/co2-timeseries
+```
+
+Keep this terminal running.
+
+## 6. Run The Streamlit Frontend
+
+Open Terminal 2 from the repo root:
+
+```bash
+source venv/bin/activate
+cd cloudConfigCheck/frontend
+python3 -m streamlit run app.py
+```
+
+Streamlit usually opens at:
+
+```text
+http://localhost:8501
+```
 
 ## Recommended Run Order
 
-From the repo root, prepare the environment and optional ML output:
+From the repo root, prepare the environment:
 
 ```bash
-# 1. Activate environment
-source .venv/bin/activate
+source venv/bin/activate
 
-# 2. Install dependencies
 pip install -r ml-pipeline/requirements.txt
 pip install -r cloudConfigCheck/frontend/requirements.txt
+```
 
-
-Then run the backend in Terminal 1:
+Optional ML output regeneration:
 
 ```bash
-source .venv/bin/activate
+python3 ml-pipeline/01_load_and_join.py
+python3 ml-pipeline/02_features_and_labels.py
+python3 ml-pipeline/03_train_models.py
+python3 ml-pipeline/04_generate_output.py
+```
+
+Run the backend in Terminal 1:
+
+```bash
+source venv/bin/activate
 cd cloudConfigCheck
 python3 security_backend.py
 ```
@@ -153,7 +211,7 @@ python3 security_backend.py
 Run the frontend in Terminal 2:
 
 ```bash
-source .venv/bin/activate
+source venv/bin/activate
 cd cloudConfigCheck/frontend
-python3 -m streamlit run pages/workload_analytics.py
+python3 -m streamlit run app.py
 ```

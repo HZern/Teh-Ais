@@ -205,14 +205,15 @@ div[data-baseweb="select"] svg {
     fill: #ffffff !important;
 }
 
-div[data-testid="stSegmentedControl"] button {
-    border-radius: 12px !important;
+div[data-testid="stRadio"] label,
+div[data-testid="stRadio"] p,
+div[data-testid="stRadio"] span {
+    color: #0f172a !important;
     font-weight: 750 !important;
 }
 
-div[data-testid="stSegmentedControl"] button[aria-pressed="true"] {
-    background-color: #111827 !important;
-    color: #ffffff !important;
+div[data-testid="stRadio"] [role="radiogroup"] {
+    gap: 18px !important;
 }
 
 .security-card {
@@ -543,20 +544,12 @@ with filter_col3:
 # -----------------------------
 # Manager/Technician Toggle
 # -----------------------------
-if hasattr(st, "segmented_control"):
-    selected_view = st.segmented_control(
-        "View mode",
-        ["Manager", "Technician"],
-        default="Manager",
-        key="security_view_mode"
-    )
-else:
-    selected_view = st.radio(
-        "View mode",
-        ["Manager", "Technician"],
-        horizontal=True,
-        key="security_view_mode"
-    )
+selected_view = st.radio(
+    "View mode",
+    ["Manager", "Technician"],
+    horizontal=True,
+    key="security_view_mode"
+)
 
 is_technician_view = selected_view == "Technician"
 
