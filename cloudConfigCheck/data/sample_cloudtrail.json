@@ -1,0 +1,38 @@
+[
+  {
+    "case_type": "safe",
+    "description": "CloudTrail is correctly configured. Logging is enabled, multi-region logging is enabled, and log file validation is enabled.",
+    "resource_id": "arn:aws:cloudtrail:eu-west-1:123456789012:trail/hilti-manufacturing-audit-trail-safe",
+    "resource_name": "hilti-manufacturing-audit-trail-safe",
+    "resource_type": "AWS::CloudTrail::Trail",
+    "team": "Manufacturing",
+    "business_context": "Tracks AWS activity for manufacturing cloud resources, including storage, databases, IAM changes, and server configuration changes.",
+    "logging_enabled": true,
+    "multi_region_enabled": true,
+    "log_file_validation_enabled": true
+  },
+  {
+    "case_type": "warning",
+    "description": "CloudTrail logging is enabled, but multi-region logging or log validation is missing. Audit logging exists but does not fully meet the professional baseline.",
+    "resource_id": "arn:aws:cloudtrail:eu-west-1:123456789012:trail/hilti-manufacturing-audit-trail-warning",
+    "resource_name": "hilti-manufacturing-audit-trail-warning",
+    "resource_type": "AWS::CloudTrail::Trail",
+    "team": "Manufacturing",
+    "business_context": "Tracks AWS activity for manufacturing systems but has incomplete audit protection settings.",
+    "logging_enabled": true,
+    "multi_region_enabled": false,
+    "log_file_validation_enabled": false
+  },
+  {
+    "case_type": "danger",
+    "description": "Dangerous CloudTrail misconfiguration. CloudTrail logging is disabled, so AWS account activity may not be properly audited.",
+    "resource_id": "arn:aws:cloudtrail:eu-west-1:123456789012:trail/hilti-manufacturing-audit-trail-danger",
+    "resource_name": "hilti-manufacturing-audit-trail-danger",
+    "resource_type": "AWS::CloudTrail::Trail",
+    "team": "Manufacturing",
+    "business_context": "Should track AWS activity for manufacturing resources, but logging is disabled.",
+    "logging_enabled": false,
+    "multi_region_enabled": false,
+    "log_file_validation_enabled": false
+  }
+]
