@@ -1,44 +1,224 @@
-# Requirements
+# Teh-Ais CloudOps Dashboard
 
-Install the required Python packages:
+## Project Description
 
-python3 -m pip install streamlit requests
+Teh-Ais CloudOps Dashboard is a manager-friendly cloud operations prototype for cybersecurity configuration checks and AI/ML workload optimisation. It helps technical and non-technical users identify unsafe cloud configurations, review workload inefficiencies, and view clear recommendations for action.
 
-The backend uses Python built-in libraries, so no extra backend packages are required.
+This project has three main parts:
 
-# How to Run
+- `ml-pipeline/` generates workload recommendation data.
+- `ai/` prepares sustainability/carbon scoring handoff output.
+- `cloudConfigCheck/` runs the backend scanner and Streamlit frontend dashboards.
 
-You need to run the backend and frontend in two separate terminals.
+## Team
 
-## Terminal 1: Run the Backend
+Team name: Teh Ais
 
-From the project root:
+Team members:
 
+- Tan Hong Guan
+- Brandon Ng Chee Wern
+- Gavyn Teh Kye Quan
+- Lim Hui Zern
+- Bradley Hoh Lok Yew
+
+## Technologies Used
+
+- Python 3.10+
+- Streamlit frontend
+- Python HTTP backend
+- AWS-style cloud configuration scanning
+- pandas, numpy, scikit-learn, xgboost, joblib, and pyarrow for ML pipeline work
+- Standard-library sustainability/carbon scoring scripts
+
+## Challenge And Approach
+
+### Cybersecurity Configuration Check
+
+Cloud environments are often managed by teams with different levels of cloud security knowledge. This can lead to inconsistent configurations and risky misconfigurations such as public storage, exposed server access, excessive permissions, public databases, missing audit logging, insecure public endpoints, and over-permissive serverless roles.
+
+Our approach is to build a cloud security monitoring module that automatically checks AWS-style cloud configuration data against professional security baselines. The dashboard separates manager-friendly explanations from technician-focused details so each user can understand what is safe, what needs review, and what requires urgent action.
+
+### AI/ML Workload Optimisation
+
+Cloud workloads can become idle, underutilized, or over-provisioned, creating unnecessary cost and carbon impact. The workload analytics module identifies these patterns and recommends actions such as shutdown, rightsizing, scheduling, or migration.
+
+The ML pipeline focuses on explainable recommendations supported by usage patterns. It also produces optimized-state values such as runtime, vCPU, RAM, and storage so downstream impact calculations can estimate cost and carbon savings.
+
+## Usage Overview
+
+Use Python 3.10+.
+
+## 1. Create And Activate A Python Environment
+
+From the repo root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+```
+
+On Windows PowerShell:
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+```
+
+## 2. Install Dependencies
+
+### Quick Install
+
+From the repo root:
+
+```bash
+pip install -r ml-pipeline/requirements.txt
+pip install -r cloudConfigCheck/frontend/requirements.txt
+```
+
+### Dependency Notes
+
+ML pipeline files under `ml-pipeline/` require:
+
+```bash
+pip install pandas numpy scikit-learn xgboost joblib pyarrow
+```
+
+These are listed in:
+
+```text
+ml-pipeline/requirements.txt
+```
+
+Streamlit frontend files under `cloudConfigCheck/frontend/` require:
+
+```bash
+pip install streamlit requests pandas altair
+```
+
+These are listed in:
+
+```text
+cloudConfigCheck/frontend/requirements.txt
+```
+
+Files under `ai/` use only the Python standard library. No extra package installation is required for:
+
+```text
+ai/sustainability_calculator.py
+ai/generate_dashboard_output.py
+```
+
+## 3. Optional: Run The ML Pipeline
+
+Run these from the repo root if you need to regenerate `ml-pipeline/resource_recommendations.json`:
+
+```bash
+python3 ml-pipeline/01_load_and_join.py
+python3 ml-pipeline/02_features_and_labels.py
+python3 ml-pipeline/03_train_models.py
+python3 ml-pipeline/04_generate_output.py
+```
+
+The backend reads:
+
+```text
+ml-pipeline/resource_recommendations.json
+```
+
+## 4. Optional: Generate Dashboard Output
+
+After the ML pipeline has produced `resource_recommendations.json`, generate the dashboard handoff JSON with:
+
+```bash
+python3 ai/generate_dashboard_output.py \
+  --input ml-pipeline/resource_recommendations.json \
+  --output person5_dashboard_output.json
+```
+
+## 5. Run The Backend
+
+Open Terminal 1 from the repo root:
+
+```bash
+source .venv/bin/activate
 cd cloudConfigCheck
 python3 security_backend.py
+```
 
-If successful, the backend will start at:
+The backend runs at:
 
+```text
 http://127.0.0.1:8000
+```
 
-The alerts endpoint is:
+Useful endpoints:
 
+```text
 http://127.0.0.1:8000/alerts
+http://127.0.0.1:8000/workload-tasks
+http://127.0.0.1:8000/co2-timeseries
+```
 
-You can test it by opening the alerts endpoint in a browser.
+Keep this terminal running.
 
-## Terminal 2: Run the Streamlit Frontend
+## 6. Run The Streamlit Frontend
 
-From the project root:
+Open Terminal 2 from the repo root:
 
+```bash
+source .venv/bin/activate
 cd cloudConfigCheck/frontend
 python3 -m streamlit run pages/workload_analytics.py
+```
 
-Or, to open the security page directly:
+To open the cloud configuration check page directly instead:
 
+```bash
+source .venv/bin/activate
 cd cloudConfigCheck/frontend
 python3 -m streamlit run pages/security_check.py
+```
 
-Streamlit will open the dashboard in your browser, usually at:
+Streamlit usually opens at:
 
+```text
 http://localhost:8501
+```
+
+## Recommended Run Order
+
+From the repo root, prepare the environment and optional ML output:
+
+```bash
+# 1. Activate environment
+source .venv/bin/activate
+
+# 2. Install dependencies
+pip install -r ml-pipeline/requirements.txt
+pip install -r cloudConfigCheck/frontend/requirements.txt
+
+# 3. Optional: regenerate ML recommendation data
+python3 ml-pipeline/01_load_and_join.py
+python3 ml-pipeline/02_features_and_labels.py
+python3 ml-pipeline/03_train_models.py
+python3 ml-pipeline/04_generate_output.py
+```
+
+Then run the backend in Terminal 1:
+
+```bash
+source .venv/bin/activate
+cd cloudConfigCheck
+python3 security_backend.py
+```
+
+Run the frontend in Terminal 2:
+
+```bash
+source .venv/bin/activate
+cd cloudConfigCheck/frontend
+python3 -m streamlit run pages/workload_analytics.py
+```
