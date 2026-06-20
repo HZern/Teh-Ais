@@ -31,6 +31,16 @@ STATUS_COLORS = {
 API_URL = "http://127.0.0.1:8000/alerts"
 
 
+def streamlit_fragment(*args, **kwargs):
+    if hasattr(st, "fragment"):
+        return st.fragment(*args, **kwargs)
+
+    def decorator(function):
+        return function
+
+    return decorator
+
+
 # Cache only for 10 seconds, matching the refresh interval.
 # If you want every refresh to call backend directly, remove this decorator.
 @st.cache_data(ttl=10)
@@ -66,6 +76,10 @@ st.markdown(
     <style>
     .main {
         background-color: #f7fafc;
+    }
+
+    [data-testid="stSidebarNav"] {
+        display: none;
     }
 
     .block-container {
@@ -468,7 +482,7 @@ with view_col2:
 # -----------------------------
 # Auto-updating alert section only
 # -----------------------------
-@st.fragment(run_every="10s")
+@streamlit_fragment(run_every="10s")
 def render_security_alert_section(
     selected_area,
     selected_security_risk,
