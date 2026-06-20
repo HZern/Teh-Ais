@@ -75,6 +75,61 @@ def fetch_security_alerts():
 st.markdown(
     """
     <style>
+    .stApp {
+        background-color: #f7fafc !important;
+        color: #0f172a !important;
+    }
+
+    [data-testid="stAppViewContainer"] {
+        background-color: #f7fafc !important;
+        color: #0f172a !important;
+    }
+
+    [data-testid="stHeader"] {
+        background-color: #f7fafc !important;
+    }
+
+    [data-testid="stToolbar"] {
+        background-color: #f7fafc !important;
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #f1f5f9 !important;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #0f172a !important;
+    }
+
+    div[data-testid="stVerticalBlock"] {
+        color: #0f172a !important;
+    }
+
+    p, span, div, label {
+        color: inherit;
+    }
+    
+    div[data-testid="stButton"] > button[kind="secondary"] {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    div[data-testid="stButton"] > button[kind="secondary"]:hover {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+    }
+
+    [data-testid="stSidebar"] div[data-testid="stButton"] > button p,
+    [data-testid="stSidebar"] div[data-testid="stButton"] > button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+
     .main {
         background-color: #f7fafc;
     }
@@ -409,7 +464,7 @@ with st.sidebar:
     if st.button("⚡ Workload Manager", use_container_width=True):
         st.switch_page("workload-nontech.py")
 
-    if st.button("🔐 Security Manager", use_container_width=True):
+    if st.button("🔐 Cloud Configuration Check", use_container_width=True):
         st.switch_page("pages/security-nontech.py")
 
     st.divider()
@@ -426,7 +481,7 @@ st.markdown(
 <div class="hero-card">
 <div class="hero-title">Security Manager View 🔐</div>
 <div class="hero-subtitle">
-Review security findings in business-friendly language and view smart recommendations directly inside each card.
+Review security findings in business-friendly language and view recommendations directly inside each card.
 </div>
 </div>
     """,
@@ -437,7 +492,7 @@ st.markdown(
     """
 <h2 class="section-heading">Priority Tasks & Issues</h2>
 <div class="section-caption">
-Security findings are shown with manager-level explanations and smart recommendations.
+Security findings are shown with manager-level explanations and recommendations.
 </div>
     """,
     unsafe_allow_html=True
@@ -654,7 +709,7 @@ Backend message: {backend_result["message"]}
 <div class="recommendation-title">{aws_part_label}</div>
 <div class="recommendation-text">{html.escape(str(aws_part))}</div>
 {resource_details_html}
-<div class="recommendation-title">Smart Recommendation</div>
+<div class="recommendation-title">Recommendation</div>
 <div class="smart-recommendation-box">
 {recommendation}
 </div>
