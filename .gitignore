@@ -3,3 +3,5 @@ __pycache__/
 *.parquet
 *.joblib
 .DS_Store
+person5_dashboard_output.json
+venv/

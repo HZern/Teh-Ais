@@ -9,8 +9,9 @@ from typing import Any
 from sustainability_calculator import SustainabilityCalculator
 
 
-DEFAULT_INPUT = Path("/Users/brandonng/Downloads/resource_recommendations.json")
-DEFAULT_OUTPUT = Path("/Users/brandonng/Documents/ImagineHack/person5_dashboard_output.json")
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_INPUT = PROJECT_DIR / "ml-pipeline" / "resource_recommendations.json"
+DEFAULT_OUTPUT = PROJECT_DIR / "person5_dashboard_output.json"
 
 
 def load_ml_recommendations(path: Path) -> list[dict[str, Any]]:
